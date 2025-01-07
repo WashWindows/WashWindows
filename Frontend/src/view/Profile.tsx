@@ -169,9 +169,12 @@ const ProfilePage: React.FC = () => {
                                         value={editedUsername}
                                         onChange={(e) => setEditedUsername(e.target.value)}
                                     />
-                                    <span
-                                        className="edit-icon"
-                                        onClick={handleUsernameEdit}
+                                     <span
+                                        className="check-icon"
+                                        onClick={() => {
+                                            setIsEditingUsername(false);
+                                            handleUsernameEdit();
+                                        }}
                                         style={{ cursor: 'pointer' }}
                                     >
                                         ✅
