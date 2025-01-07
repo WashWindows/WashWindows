@@ -12,7 +12,8 @@ export const Rank: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
+    const [sortBy, setSortBy] = useState<'points' | 'username'>('points'); // 排序方式
+
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
 
@@ -32,9 +33,9 @@ export const Rank: React.FC = () => {
                 });
 
                 if (response.code === 200 && Array.isArray(response.body)) {
-                    // 排序用戶數據，依據分數從高到低
-                    const sortedRank = response.body
-                        .sort((a: RankItem, b: RankItem) => b.points - a.points);
+                    const sortedRank = response.body.sort(
+                        (a: RankItem, b: RankItem) => b.points - a.points
+                    ); // 初始以分數排序
                     setRank(sortedRank);
                 } else {
                     setError('無法載入排行榜數據');
@@ -57,11 +58,29 @@ export const Rank: React.FC = () => {
         setUser(null);
     };
 
+    const toggleSort = () => {
+        const newSortBy = sortBy === 'points' ? 'username' : 'points';
+        setSortBy(newSortBy);
+
+        const sortedRank = [...rank].sort((a, b) => {
+            if (newSortBy === 'points') {
+                return b.points - a.points; // 按分數排序
+            } else {
+                return a.username.localeCompare(b.username, 'zh-Hant'); // 按名稱排序
+            }
+        });
+
+        setRank(sortedRank);
+    };
+
     return (
         <>
             <Header isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
             <div className="rank-page">
-            <h1>排行榜</h1>
+                <h1>排行榜</h1>
+                <button className="toggle-sort-btn" onClick={toggleSort}>
+                    排序依據：{sortBy === 'points' ? '分數' : '名稱'}
+                </button>
                 <div className="rank-container">
                     {isLoading ? (
                         <div className="loading">載入中...</div>
