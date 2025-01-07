@@ -14,25 +14,25 @@ export class UserRoute extends Route{
     }
 
     protected setRoutes(): void {
-        
-        this.router.get(`${this.url}findAll`,(req, res)=>{
-            this.Contorller.findAll(req, res);
+
+        this.router.get(`${this.url}getAllUserPoints`,(req, res)=>{
+            this.Contorller.getAllUserPoints(req, res);
         })
 
-        /**
-         * 新增學生
-         * request body {
-         *  userName: string,
-         *  name: string",
-         *  department: string,
-         *  grade: string,
-         *  class: string,
-         *  Email: string
-         * } 
-         * @returns resp<Student>
-         */
-        this.router.post(`${this.url}insertOne`,(req, res)=>{
-            this.Contorller.insertOne(req, res);
+        this.router.put(`${this.url}updateByUserId`, (req, res) => {
+            this.Contorller.updateByUserId(req, res);
+        })
+
+        this.router.put(`${this.url}updatePoints`, (req, res) => {
+            this.Contorller.updatePoitns(req, res);
+        })
+        
+        this.router.delete(`${this.url}deleteByUserId`, (req, res) => {
+            this.Contorller.deleteByUserId(req, res);
+        })
+        
+        this.router.post(`${this.url}updatePassword`, (req, res) => {
+            this.Contorller.updatePassword(req, res);
         })
     }
 }

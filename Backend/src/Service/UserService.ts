@@ -1,142 +1,235 @@
 import { Service } from "../abstract/Service";
-import { Student } from "../interfaces/Student";
 import { logger } from "../middlewares/log";
-import { studentsModel } from "../orm/schemas/studentSchemas";
 import { Document } from "mongoose"
-import { MongoDB } from "../utils/MongoDB";
 import { DBResp } from "../interfaces/DBResp";
 import { resp } from "../utils/resp";
-
-type seatInfo = {
-    schoolName:string,
-    department:string,
-    seatNumber:string
-}
+import { userModel } from "../orm/schemas/userSchemas";
+import * as bcrypt from 'bcrypt';
+import { verifyToken } from "../utils/token";
+import { Request } from "express";
+import { User } from "../interfaces/User";
 
 export class UserService extends Service {
 
-    public async getAllStudents(): Promise<Array<DBResp<Student>>|undefined> {
+    public async getAllUserPoints(): Promise<Array<DBResp<User>> | undefined> {
         try {
-            const res:Array<DBResp<Student>> = await studentsModel.find({});
-            return res;
+            const users = await userModel
+                .find({points: { $gt: 0 }})
+                .select('username points')
+                .sort({ points: -1 });
+            return users;
         } catch (error) {
             return undefined;
         }
-        
     }
 
-    /**
-     * 新增學生
-     * @param info 學生資訊
-     * @returns resp
-     */
-    public async insertOne(info: Student): Promise<resp<DBResp<Student>|undefined>>{
-
-        const current = await this.getAllStudents()
-        const resp:resp<DBResp<Student>|undefined> = {
+    public async updateByUserId(Request: Request): Promise<resp<DBResp<Document>|undefined>> {
+        const resp: resp<DBResp<Document> | undefined> = {
             code: 200,
             message: "",
             body: undefined
         }
-
-        if (current && current.length>0) {
-            try{
-                const nameValidator = await this.userNameValidator(info.userName);
-                if (current.length>=200) {
-                    resp.message = "student list is full";
-                    resp.code = 403;
-                }else{
-                    if (nameValidator === "驗證通過") {
-                        info.sid = String(current.length+1) ;
-                        info._id = undefined;
-                        const res = new studentsModel(info);
-                        resp.body = await res.save();
-                    }else{
-                        resp.code = 403;
-                        resp.message = nameValidator;
-                    }
-                }
-            } catch(error){
-                resp.message = "server error";
-                resp.code = 500;
+        try {
+            const authHeader = Request.headers['authorization'];
+            if (!authHeader) {
+                resp.code = 401;
+                resp.message = "未提供認證資訊";
+                return resp;
             }
-        }else{
-            resp.message = "server error";
+    
+            const token = authHeader.split(' ')[1];
+            const decoded = verifyToken(token) as { _id: string, userRole: string };
+    
+            // 檢查權限
+            const { _id, username } = Request.body; // 從 body 取得要更新的用戶 ID
+    
+            if (decoded.userRole !== 'admin' && decoded._id !== _id) { // 檢查是否為管理員或本人
+                resp.code = 403;
+                resp.message = "權限不足";
+                return resp;
+            }
+    
+            if (!_id || !username ) {
+                resp.code = 400;
+                resp.message = "缺少必要資料";
+                return resp;
+            }
+    
+            const existingUser = await userModel.findById(_id);
+            if (!existingUser) {
+                resp.code = 404;
+                resp.message = "找不到使用者";
+                return resp;
+            }
+    
+            if (existingUser.username === username) {
+                resp.code = 304;
+                resp.message = "資料並未有更新";
+                return resp;
+            }
+    
+            existingUser.username = username;
+    
+            resp.message = "更新資料成功";
+            resp.body = await existingUser.save();
+            return resp;
+    
+        } catch (error) {
             resp.code = 500;
+            resp.message = "伺服器異常";
+            logger.error("user updating error: ", error);
+        }
+        return resp;
+    }
+
+    public async updatePoints(Request: Request): Promise<resp<DBResp<Document>|undefined>> {
+        const resp: resp<DBResp<Document> | undefined> = {
+            code: 200,
+            message: "",
+            body: undefined
+        }
+        try {
+            const authHeader = Request.headers['authorization'];
+            if (!authHeader) {
+                resp.code = 401;
+                resp.message = "未提供認證資訊";
+                return resp;
+            }
+
+            const token = authHeader.split(' ')[1];
+            const decoded = verifyToken(token) as { _id: string, userRole: string };
+            const { _id, points, clicked } = Request.body;
+
+            if (decoded.userRole !== 'admin' && decoded._id !== _id) { // 檢查是否為管理員或本人
+                resp.code = 403;
+                resp.message = "權限不足";
+                return resp;
+            }
+
+            if (!_id || !points || !clicked) {
+                resp.code = 400;
+                resp.message = "缺少必要資料";
+                return resp;
+            }
+            const existingUser = await userModel.findById(_id);
+            if (!existingUser) {
+                resp.code = 404;
+                resp.message = "找不到使用者";
+                return resp;
+            }
+            existingUser.points = points;
+            existingUser.clicked = clicked;
+            
+            await existingUser.save();
+
+            resp.message = "點數更新成功";
+            resp.body = existingUser;
+            return resp;
+        }
+        catch (error) {
+            resp.code = 500;
+            resp.message = "伺服器異常";
+            logger.error("user updating points error: ", error);
+        }
+        return resp;
+    }
+
+    public async deleteByUserId(Request: Request): Promise<resp<DBResp<Document>|undefined>> {
+        const resp: resp<DBResp<Document> | undefined> = {
+            code: 200,
+            message: "",
+            body: undefined
+        }
+        try {
+            const authHeader = Request.headers['authorization'];
+            if (!authHeader) {
+                resp.code = 401;
+                resp.message = "未提供認證資訊";
+                return resp;
+            }
+
+            const token = authHeader.split(' ')[1];
+            const decoded = verifyToken(token) as { _id: string, userRole: string };
+            const { _id, password } = Request.body;
+
+            if (decoded.userRole !== 'admin' && decoded._id !== _id) { // 檢查是否為管理員或本人
+                resp.code = 403;
+                resp.message = "權限不足";
+                return resp;
+            }
+
+            const user = await userModel.findById(_id);
+            if (!user) {
+                resp.code = 404;
+                resp.message = "找不到使用者";
+                return resp;
+            }
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            if (!isPasswordValid) {
+                resp.code = 401;
+                resp.message = "密碼錯誤";
+                return resp;
+            }
+
+            user.delete();
+            resp.message = "刪除帳號成功";
+            return resp;
+        } catch (error) {
+            resp.code = 500;
+            resp.message = "伺服器異常";
+            logger.error("Delete By UserId error: ", error);
         }
 
         return resp;
-
     }
 
-    /**
-     * 學生名字驗證器
-     * @param userName 學生名字
-     * tku ee 0787
-     * ee 科系縮寫
-     *  0787 四碼
-     * 座號檢查，跟之前有重複就噴錯  只能寫沒重複的號碼
-     */
-    public async userNameValidator(userName: string): Promise<
-    '學生名字格式不正確，應為 tku + 科系縮寫 + 四碼座號，例如: tkubm1760' | '座號已存在' | '校名必須為 tku' | '座號格式不正確，必須為四位數字。' | '驗證通過'
-    > {
-
-        if (userName.length < 7) { 
-            return ('學生名字格式不正確，應為 tku + 科系縮寫 + 四碼座號，例如: tkubm1760');
+    public async updatePassword(Request: Request): Promise<resp<DBResp<Document>|undefined>> {
+        const resp: resp<DBResp<Document> | undefined> = {
+            code: 200,
+            message: "",
+            body: undefined
         }
+        try {
+            const authHeader = Request.headers['authorization'];
+            if (!authHeader) {
+                resp.code = 401;
+                resp.message = "未提供認證資訊";
+                return resp;
+            }
 
-        const info = this.userNameFormator(userName);
+            const token = authHeader.split(' ')[1];
+            const decoded = verifyToken(token) as { _id: string, userRole: string };
+            const { _id, password, new_password } = Request.body;
 
-        if (info.schoolName !== 'tku') {
-            return '校名必須為 tku';
+            if (decoded._id !== _id) { // 檢查是否為本人
+                resp.code = 403;
+                resp.message = "權限不足";
+                return resp;
+            }
+
+            const user = await userModel.findById(_id);
+            if (!user) {
+                resp.code = 404;
+                resp.message = "找不到使用者";
+                return resp;
+            }
+
+            const isPasswordCorrect = await bcrypt.compare(password, user.password);
+            if (!isPasswordCorrect) {
+                resp.code = 401;
+                resp.message = "密碼錯誤";
+                return resp;
+            }
+
+            user.password = await bcrypt.hash(new_password, 10);
+            resp.body = await user.save();
+            resp.message = "密碼修改成功";
         }
-    
-        // 驗證座號(正則不想寫可以給 gpt 寫, 記得測試就好)
-        const seatNumberPattern = /^\d{4}$/; // 驗證4個數字
-        
-        if (!seatNumberPattern.test(info.seatNumber)) {
-            return '座號格式不正確，必須為四位數字。';
+        catch (error) {
+            resp.code = 500;
+            resp.message = "伺服器異常";
+            logger.error("update password error: ", error);
         }
-
-        if (await this.existingSeatNumbers(info.seatNumber)) {
-            return '座號已存在'
-        }
-
-        return '驗證通過'
-        
+        return resp;
     }
-
-    /**
-     * 用戶名格式化
-     * @param userName 用戶名
-     * @returns seatInfo
-     */
-    public userNameFormator(userName: string){
-        const info:seatInfo = {
-            schoolName: userName.slice(0, 3),
-            department: userName.slice(3, userName.length - 4),
-            seatNumber: userName.slice(-4)
-        }
-        return info
-    }
-
-    /**
-     * 檢查用戶名是否存在
-     * @param SeatNumber 
-     * @returns boolean
-     */
-    public async existingSeatNumbers(SeatNumber:string):Promise<boolean>{
-        const students = await this.getAllStudents();
-        let exist = false
-        if (students) {
-            students.forEach((student)=>{
-                const info = this.userNameFormator(student.userName)
-                if (info.seatNumber === SeatNumber) {
-                    exist = true;
-                }
-            })
-        }
-        return exist
-    }
-
 }
