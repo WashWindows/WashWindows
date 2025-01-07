@@ -3,7 +3,7 @@
   text-align: center;
   background-color: #ffffff;
   padding: 20px;
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,18 +14,19 @@
 }
 
 .profile-container {
-  background-color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(90deg, #c5d5fa, #ffff92);
   border: none; 
-  border-radius: 15px;
   padding: 30px;
-  max-width: 500px;
+  border-radius: 15px;
+  max-width: 450px;
   width: 90%;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .profile-container .image-container {
   position: relative;
-  height: 50px;
+  height: 120px;
+  width: 120px;
   margin: 0 auto;
   border: 4px solid #000000;
   border-radius: 50%;
@@ -38,23 +39,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  width: 100%;
+  height: 100px;
+  width: 100px;
   transition: background-color 0.3s ease;
 }
 
-.profile-container .profile-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.profile-container #image-upload {
-  display: none;
+.profile-container .user {
+  width: 150px;
+  height: 150px;
+  transform:translateX(10px);
+  margin-top:50px;
 }
 
 .profile-container .user-info {
   margin-top: 20px;
+  line-height: 30px;
 }
 
 .profile-container .username {
@@ -110,6 +109,24 @@
   transform: translateY(2px); /* 點擊時稍微下壓 */
 }
 
+.profile-container input{
+  width: 100px;
+  border-top: 0px;
+  border-left: 0px;
+  border-right: 0px;
+  border-bottom: 1px solid #000000;
+  outline: none;
+  background-color: #ffffff00;
+  padding-right: 30px;
+}
+.profile-container .check-icon {
+  position: absolute;
+  right: 670px; 
+  font-size: 20px;
+  top: 45%;
+  transform: translateY(390%);
+  color: green;
+}
 /* 小螢幕適配 */
 @media (max-width: 768px) {
   .profile-container {
@@ -145,7 +162,7 @@
 .modal-content {
   background: #fff;
   border-radius: 10px;
-  padding: 20px;
+  padding: 30px;
   max-width: 400px;
   width: 90%;
   text-align: center;
@@ -173,7 +190,7 @@
   display: block;
   font-size: 0.9rem;
   color: #333;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 .modal-input-group input {
@@ -188,10 +205,15 @@
 .modal-actions {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 15px;
 }
 
 .modal .button {
+  border-radius: 10px;
+  color: #ffffff;
+  border: none;
+  font-size: 14px;
+  padding: 10px 16px;
   background-color: #0077ff;
 }
 
