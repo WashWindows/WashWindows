@@ -101,3 +101,28 @@
     color: #dc3545;
     font-size: 1.2rem;
 }
+.toggle-sort-btn {
+    margin: 20px 0; /* 按鈕上下的間距 */
+    padding: 12px 20px; /* 增加內間距 */
+    background: rgba(255, 255, 255, 0.8); /* 半透明白色背景 */
+    color: #444; /* 深灰色字體，保持清晰可讀 */
+    border: 1px solid #ddd; /* 細邊框，與背景搭配 */
+    border-radius: 16px; /* 圓角風格 */
+    font-size: 1.3rem; /* 字體大小與其他內容一致 */
+    font-weight: 600; /* 加粗字體 */
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* 輕微陰影效果 */
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s; /* 動態效果 */
+}
+
+.toggle-sort-btn:hover {
+    background: rgba(255, 255, 255, 1); /* 懸停時背景變為不透明 */
+    transform: translateY(-2px); /* 按鈕向上移動 */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* 增強陰影效果 */
+}
+
+.toggle-sort-btn:active {
+    transform: translateY(1px); /* 按下時略微下壓 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 陰影縮小 */
+}
+
