@@ -43,15 +43,21 @@
     ![流程](https://i.imgur.com/gFKfWif.png)
 ## 規劃
 
-- ### 資料與邏輯分離
-    透過將資料和邏輯分離，我們可以確保各部分的獨立性，提升代碼的可維護性。這樣的設計方式，讓開發者在處理數據時不會受到其他功能的影響，進一步提高開發效率。
-    
-- ### API 設計
-    - 清晰定義各項目之間的 API 介面，確保資料的傳輸和處理具有一致性。
-    
-    - 透過使用標準化的 API 設計，開發者能快速理解系統運作方式，並且在添加新功能時能夠保持系統的一致性。
-
-    - 支持多個項目透過相同的 API 進行交互，增強系統的靈活性。
+- ### 1. 元件結構
+    - UI 元件：Button、Form、PageContainer 等基礎元件
+    - 遊戲元件：GameArea、RankList、Scoreboard 等功能元件
+    - 佈局元件：Header、PageContainer 等結構元件
+- ### 2. 狀態管理
+    - useAuth Hook 集中管理認證邏輯
+    - 將共用邏輯抽離成自定義 Hook
+- ### 3. 代碼復用
+    - logoutHandler 統一處理登出邏輯
+    - Form 元件處理各類表單操作
+    - PageContainer 統一頁面布局
+- ### 4. 關注點分離
+    - 業務邏輯與 UI 展示分離
+    - 狀態管理與渲染邏輯分離
+    - API 調用集中管理
 
 ## 安裝與執行指引
 ### **1. 下載專案**
@@ -109,4 +115,5 @@ npm run dev
 ### 4. **資料庫連線**
 系統使用 MongoDB 作為資料庫，請確保安裝並啟動 MongoDB。  
 
-![](https://github.com/kevin083177/WashWindows/blob/main/api.md)
+### 5.**API規格**
+[API Doc](https://github.com/WashWindows/WashWindows/blob/main/api.md)
