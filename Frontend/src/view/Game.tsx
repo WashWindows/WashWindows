@@ -9,7 +9,7 @@ import Scoreboard from '../component/ui/Scoreboard';
 import GameArea from '../component/game/GameArea';
 import { useAuth } from '../hooks/useAuth';
 
-export const WashWindowsGame: React.FC = () => {
+export const Game: React.FC = () => {
   const { token, user, isLoggedIn, setUser, onLogout } = useAuth();
     
   const [points, setPoints] = useState<number>(0);
@@ -114,5 +114,3 @@ export const WashWindowsGame: React.FC = () => {
     </div>
   );
 };
-
-export default WashWindowsGame;
