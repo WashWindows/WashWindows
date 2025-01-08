@@ -115,5 +115,5 @@ npm run dev
 ### 4. **資料庫連線**
 系統使用 MongoDB 作為資料庫，請確保安裝並啟動 MongoDB。  
 
-### 5. **API規格說明**
+## API規格說明
 [API Doc](https://github.com/WashWindows/WashWindows/blob/main/api.md)
