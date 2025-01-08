@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Window from "../assets/window.png";
-import Rag from "../assets/rag.png";
-import Dirty from "../assets/dirty.png";
-import wipeAudio from '../assets/wipe.mp3';
-import wrongAudio from '../assets/wrong.mp3';
+import Window from "../../assets/window.png";
+import Rag from "../../assets/rag.png";
+import Dirty from "../../assets/dirty.png";
+import wipeAudio from '../../assets/wipe.mp3';
+import wrongAudio from '../../assets/wrong.mp3';
 
 interface GameAreaProps {
     points: number;
