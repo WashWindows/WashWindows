@@ -4,7 +4,7 @@ import userPng from "../assets/user.jpg";
 import '../style/Profile.css';
 import Header from '../component/Header';
 import { asyncDelete, asyncPost, asyncPut } from '../utils/fetch';
-import { user_api } from '../enum/api';
+import { auth_api, user_api } from '../enum/api';
 import { useNavigate } from 'react-router-dom';
 const ProfilePage: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -28,7 +28,16 @@ const ProfilePage: React.FC = () => {
         }
     }, [token, savedUser]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            await asyncPost(auth_api.logout, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            })
+        } catch (error) {
+            console.log("logout error: ", error);
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setIsLoggedIn(false);
@@ -38,6 +47,10 @@ const ProfilePage: React.FC = () => {
     const handleUsernameEdit = async () => {
         if (!editedUsername.trim()) {
             alert('使用者名稱不可為空白！');
+            return;
+        }
+        if (editedUsername.length < 6 || editedUsername.length > 12) {
+            alert("使用者名稱需介於6至12字元");
             return;
         }
 
@@ -60,8 +73,11 @@ const ProfilePage: React.FC = () => {
                     'user',
                     JSON.stringify({ ...user, username: editedUsername })
                 );
+            } else if (response.status === 304) {
+                alert("新名稱與舊名稱相同")
+                setEditedUsername("");
             } else {
-                alert('使用者名稱更新失敗，請稍後再試。');
+                alert('使用者名稱更新失敗，請稍後再試');
             }
         } catch (error) {
             console.error('更新使用者名稱時發生錯誤：', error);
@@ -105,7 +121,7 @@ const ProfilePage: React.FC = () => {
                 alert('密碼修改成功！請重新登入');
                 setIsPasswordModalOpen(false);
                 handleLogout();
-                navigate("#/Login")
+                navigate("/Login")
             } else {
                 alert('密碼修改失敗，請檢查舊密碼是否正確。');
             }
@@ -114,14 +130,16 @@ const ProfilePage: React.FC = () => {
             alert('修改密碼失敗，請稍後再試。');
         }
     };
-
+    const handleAletToLogin = () => {
+        alert("請先登入");
+    }
     const handleDeleteAccount = async () => {
         if (!window.confirm('您確定要刪除帳號嗎？此操作無法恢復。')) {
             return;
         }
     
         if (!passwordInput.oldPassword) {
-            alert('請輸入密碼以確認刪除帳號。');
+            alert('請輸入密碼確認刪除帳號。');
             return;
         }
     
@@ -138,8 +156,8 @@ const ProfilePage: React.FC = () => {
     
             if (response.ok) {
                 alert('帳號已刪除，將自動登出。');
-                handleLogout(); // 清空 localStorage 並登出
-                navigate('#/'); // 導航回主頁
+                handleLogout();
+                navigate('/');
             } else {
                 const errorData = await response.json();
                 alert(`帳號刪除失敗：${errorData.message || '未知錯誤'}`);
@@ -167,26 +185,25 @@ const ProfilePage: React.FC = () => {
                                     <input
                                         type="text"
                                         value={editedUsername}
+                                        placeholder={user?.username}
                                         onChange={(e) => setEditedUsername(e.target.value)}
                                     />
                                      <span
                                         className="check-icon"
                                         onClick={() => {
                                             setIsEditingUsername(false);
-                                            handleUsernameEdit();
+                                            handleUsernameEdit()
                                         }}
-                                        style={{ cursor: 'pointer' }}
                                     >
-                                        ✅
+                                        ✔
                                     </span>
                                 </>
                             ) : (
                                 <>
-                                    {user?.username}
+                                    {isLoggedIn ? user?.username : "遊客"}
                                     <span
                                         className="edit-icon"
-                                        onClick={() => setIsEditingUsername(true)}
-                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => isLoggedIn ? setIsEditingUsername(true) : handleAletToLogin()}
                                     >
                                         🖊
                                     </span>
@@ -194,12 +211,12 @@ const ProfilePage: React.FC = () => {
                             )}
                         </span>
                         <div className="stats">
-                            <span>Points: {user?.points}</span>
+                            <span>Points: {isLoggedIn ? user?.points : 0}</span>
                         </div>
                     </div>
                     <div className="action-buttons">
-                        <button className="button" onClick={() => setIsPasswordModalOpen(true)}>修改密碼</button>
-                        <button className="button" onClick={() => setIsDeleteModalOpen(true)}>刪除帳號</button>
+                        <button className="button" onClick={() => isLoggedIn ? setIsPasswordModalOpen(true) : handleAletToLogin()}>修改密碼</button>
+                        <button className="button" onClick={() => isLoggedIn ? setIsDeleteModalOpen(true) : handleAletToLogin()}>刪除帳號</button>
                     </div>
                 </div>
             </div>

@@ -1,17 +1,17 @@
 .manager-page {
     padding: 40px;
-    background-color: #f0f0f0;
+    /* background-color: #f0f0f0; */
     border-radius: 16px;
     max-width: 90%;
     width: 90%;
     height: 90vh;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); */
     text-align: center;
     overflow-y: auto; 
     margin: 0 auto;
     font-family: 'Arial', sans-serif;
     color: #333;
-    background: linear-gradient(135deg, #f5f7fa, #c3cfe2); 
+    /* background: linear-gradient(135deg, #f5f7fa, #c3cfe2);  */
 }
 
 .manager-page h2, h3 {
@@ -64,7 +64,7 @@
     color: #555;
 }
 .player-card button {
-    padding: 5px 10px;
+    padding: 10px 20px;
     background-color: #007bff;
     color: white;
     border: none;
@@ -78,6 +78,10 @@
 
 .player-card .deleteButton {
     background-color: rgba(255, 24, 24, 0.712);
+}
+
+.player-card .deleteButton:hover {
+    background-color: rgb(255, 4, 4);
 }
 
 .player-card button:last-child {

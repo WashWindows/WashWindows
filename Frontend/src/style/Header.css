@@ -5,16 +5,16 @@
   font-style: normal;
 }
 
-.header {
+.Header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: linear-gradient(to right, #2c3e50, #3498db);
+  background: #dbc466;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-.header .btn {
+.Header .btn {
   left: 100px;
   text-decoration: none;
   color: white;
@@ -24,17 +24,17 @@
   transition: transform 0.3s;
 }
 
-.header .btn:hover {
+.Header .btn:hover {
   transform: scale(1.05);
 }
 
-.header .button-group {
+.Header .button-group {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
-.header .button {
+.Header .button {
   text-decoration: none;
   padding: 0.5rem 1.2rem;
   border-radius: 20px;
@@ -44,12 +44,12 @@
   border: 1px solid rgba(255,255,255,0.3);
 }
 
-.header .button:hover {
+.Header .button:hover {
   background-color: rgba(255,255,255,0.25);
   transform: translateY(-2px);
 }
 
-.header .user-info {
+.Header .user-info {
   position: relative;
   padding: 0.5rem 1rem;
   font-size: 1.2rem;
@@ -59,17 +59,17 @@
   transition: all 0.3s;
 }
 
-.header .user-info:hover {
+.Header .user-info:hover {
   background-color: rgba(255,255,255,0.1);
 }
 
-.header .user-info:hover .dropdown {
+.Header .user-info:hover .dropdown {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
 
-.header .dropdown {
+.Header .dropdown {
   position: absolute;
   top: 100%;
   right: 0;
@@ -85,7 +85,7 @@
   z-index: 1000;
 }
 
-.header .dropdown a {
+.Header .dropdown a {
   display: block;
   text-decoration: none;
   color: #2c3e50;
@@ -94,18 +94,19 @@
   transition: all 0.2s;
 }
 
-.header .dropdown a:hover {
+.Header .dropdown a:hover {
   background-color: #f8f9fa;
   
   color: #3498db;
   transform: translateX(5px);
 }
 
-.header .dropdown button {
+.Header .dropdown button {
   width: 100%;
   padding: 0.8rem;
   margin-top: 0.5rem;
   border: none;
+  font-size: 1rem;
   background-color: #e74c3c;
   color: white;
   border-radius: 4px;
@@ -113,7 +114,7 @@
   transition: all 0.3s;
 }
 
-.header .dropdown button:hover {
+.Header .dropdown button:hover {
   background-color: #c0392b;
   transform: translateY(-2px);
 }

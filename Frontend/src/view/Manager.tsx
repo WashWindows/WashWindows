@@ -12,8 +12,15 @@ const Manager: React.FC = () => {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
 
-    const [sortIndex, setSortIndex] = useState(0); // 排序屬性索引
+    const [sortIndex, setSortIndex] = useState(0);
     const sortKeys: (keyof User | 'accuracy')[] = ['username', 'points', 'clicked', 'accuracy'];
+    const sortKeyLabels: { [key: string]: string } = {
+        username: '名稱',
+        points: '分數',
+        clicked: '點擊數',
+        accuracy: '準確率'
+    };
+
     useEffect(() => {
         if (token && savedUser) {
             setIsLoggedIn(true);
@@ -67,7 +74,7 @@ const Manager: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('您確定要刪除詆玩家嗎？此操作無法恢復。')) {
+        if (!window.confirm('您確定要刪除該玩家嗎？此操作無法恢復。')) {
             return;
         }
 
@@ -89,48 +96,51 @@ const Manager: React.FC = () => {
             alert('刪除玩家時發生錯誤，請稍後再試。');
         }
     };
-    const handleSort = () => {
-        const key = sortKeys[sortIndex]; // 獲取當前排序屬性
-        const nextIndex = (sortIndex + 1) % sortKeys.length; // 計算下一個索引
 
-        setSortIndex(nextIndex);
-
-        setPlayers((prevPlayers) => {
-            const sortedPlayers = [...prevPlayers].sort((a, b) => {
-                let aValue = key === 'accuracy' ? calculateAccuracy(a.points, a.clicked) : a[key];
-                let bValue = key === 'accuracy' ? calculateAccuracy(b.points, b.clicked) : b[key];
-
-                if (typeof aValue === 'string' && typeof bValue === 'string') {
-                    return bValue.localeCompare(aValue); // 字串降序
-                }
-
-                return bValue - aValue; // 數值降序
-            });
-            return sortedPlayers;
-        });
+    const calculateAccuracy = (points: number, clicked: number): number => {
+        if (!clicked) return 0;
+        return Number(((points / clicked) * 100).toFixed(2));
     };
 
-    const calculateAccuracy = (points: number, clicked: number) => {
-        if (!clicked) return "0.00";
-        return ((points / clicked) * 100).toFixed(2);
+    const handleSort = () => {
+        const nextIndex = (sortIndex + 1) % sortKeys.length;
+        const key = sortKeys[nextIndex];
+    
+        setSortIndex(nextIndex);
+    
+        setPlayers((prevPlayers) => {
+            return [...prevPlayers].sort((a, b) => {
+                if (key === 'accuracy') {
+                    const aAccuracy = calculateAccuracy(a.points, a.clicked);
+                    const bAccuracy = calculateAccuracy(b.points, b.clicked);
+                    return bAccuracy - aAccuracy;
+                }
+    
+                if (key === 'username') {
+                    return a[key].localeCompare(b[key]);
+                }
+    
+                return (b[key] as number) - (a[key] as number);
+            });
+        });
     };
 
     return (
         <>
             <Header isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
             <div className="manager-page">
-                <h3>玩家管理</h3>
-                <button onClick={handleSort}>
-                        排序（{sortKeys[sortIndex] === 'accuracy' ? '準確率' : sortKeys[sortIndex]}）
-                    </button>
+                <h1>玩家管理</h1>
+                <button className="toggle-sort-btn" onClick={handleSort}>
+                    排序（{sortKeyLabels[sortKeys[(sortIndex) % sortKeys.length]]}）
+                </button>
                 <div className="player-list">
                     {players.map((player) => (
                         <div key={player._id} className="player-card">
                             <h4>{player.username}</h4>
                             <p>ID: {player._id}</p>
-                            <p>分數: {player.points}</p>
-                            <p>點擊數: {player.clicked}</p>
-                            <p>準確率: {calculateAccuracy(player.points, player.clicked)}%</p>
+                            <p>{sortKeyLabels.points}: {player.points}</p>
+                            <p>{sortKeyLabels.clicked}: {player.clicked}</p>
+                            <p>{sortKeyLabels.accuracy}: {calculateAccuracy(player.points, player.clicked)}%</p>
                             <button onClick={() => handleResetScore(player._id)}>重置分數</button>
                             <button className="deleteButton" onClick={() => handleDelete(player._id)}>刪除</button>
                         </div>

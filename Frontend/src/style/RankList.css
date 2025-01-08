@@ -21,7 +21,7 @@
     width: 24px;
     height: 24px;
     border: 3px solid transparent;
-    border-top-color: #3498db;
+    border-top-color: #dbc466;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     position: absolute;
@@ -35,7 +35,7 @@
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-    background-color: #f8d754;
+    background-color: #dbc466;
     color: #fff;
     border: none;
     padding: 1rem 0.5rem;
@@ -136,8 +136,12 @@
 
 .rank-item.user-rank {
     position: sticky;
-    background-color: #abcbe2;
+    background-color: #dbc466;
     font-weight: bold;
     margin-bottom: 0px;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.rank-item.user-rank:hover {
+    background-color: #f8c705;
 }

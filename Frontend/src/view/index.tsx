@@ -8,6 +8,8 @@ import { asyncPut } from '../utils/fetch';
 import { user_api } from '../enum/api';
 import Header from '../component/Header';
 import RankList from '../component/RankList';
+import wipeAudio from '../assets/wipe.mp3';
+import wrongAudio from '../assets/wrong.mp3';
 
 export const WashWindowsGame: React.FC = () => {
   const [points, setPoints] = useState<number>(0);
@@ -46,7 +48,11 @@ export const WashWindowsGame: React.FC = () => {
   };
 
   const throttledUpdatePoints = async () => {
-    if (!token || !user?._id || (points === pointsBuffer && clicked === clickedBuffer)) {
+    if (points === pointsBuffer && clicked === clickedBuffer) {
+      return;
+    }
+    if (!user?._id || !token) {
+      setUpdateStatus("請先登入！");
       return;
     }
 
@@ -105,6 +111,7 @@ export const WashWindowsGame: React.FC = () => {
     setPointsBuffer(0);
     setClicked(0);
     setClickedBuffer(0);
+    window.location.reload();
   };
 
   const handleScoreIncrease = () => {
@@ -150,6 +157,11 @@ export const WashWindowsGame: React.FC = () => {
     setCurrentKey(generateRandomKey());
   }, []);
 
+  const playSound = (src: string) => {
+    const audio = new Audio(src);
+    audio.play();
+  };
+
   const updatePosition = (key: string) => {
     const step = 8;
     setPosition((prevPosition) => {
@@ -179,10 +191,12 @@ export const WashWindowsGame: React.FC = () => {
         handleScoreIncrease();
         setWrongAttempt(false);
         updatePosition(key);
+        playSound(wipeAudio);
         setTimeout(() => {
           setCurrentKey(generateRandomKey());
         }, 200)
       } else {
+        playSound(wrongAudio);
         updatePosition(key);
         handleWrongAttempt();
       }
@@ -241,7 +255,7 @@ export const WashWindowsGame: React.FC = () => {
             ))}
           </div>
           {updateStatus && (
-            <div className={`update-status ${isExiting ? 'exit' : ''}`}>
+            <div className={`update-status ${isExiting ? 'exit' : ''}`}  style={{ backgroundColor: updateStatus === "請先登入！" ? '#ff2222' : '#3498dbe6' }}>
               {updateStatus}
             </div>
           )}

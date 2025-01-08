@@ -23,7 +23,7 @@ export async function asyncGet(api: string, { headers = {} }: {headers?: Headers
     }
 }
 
-export async function asyncPost(api: string, { body, headers = {} }: { body: any, headers?: HeadersInit }): Promise<Response> {
+export async function asyncPost(api: string, { body, headers = {} }: { body?: any, headers?: HeadersInit }): Promise<Response> {
     try {
         const res: Response = await fetch(api, {
             method: 'POST',

@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, user, onLogout }) => {
   };
 
   return (
-    <header className="header">
+    <header className="Header">
       <a className='btn' href='#/'>Washwindows Game</a>
       <div className="button-group">
         {!isLoggedIn ? (
