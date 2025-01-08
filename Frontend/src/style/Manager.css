@@ -1,17 +1,16 @@
 .manager-page {
     padding: 40px;
-    /* background-color: #f0f0f0; */
     border-radius: 16px;
     max-width: 90%;
     width: 90%;
     height: 90vh;
-    /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); */
-    text-align: center;
-    overflow-y: auto; 
     margin: 0 auto;
     font-family: 'Arial', sans-serif;
     color: #333;
-    /* background: linear-gradient(135deg, #f5f7fa, #c3cfe2);  */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 移除manager-page的滾動 */
+    align-items: center;
 }
 
 .manager-page h2, h3 {
@@ -36,7 +35,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    max-height: 75%;
     justify-content: center;
+    overflow-y: auto; /* 只有 player-list 可以滾動 */
 }
 
 .player-card {
@@ -47,6 +48,8 @@
     width: 300px;
     text-align: center;
     transition: transform 0.2s, box-shadow 0.2s;
+    /* 確保卡片有最小高度，避免內容過少時的排版問題 */
+    min-height: 250px;
 }
 
 .player-card:hover {
@@ -63,6 +66,7 @@
     margin: 5px 0;
     color: #555;
 }
+
 .player-card button {
     padding: 10px 20px;
     background-color: #007bff;
@@ -70,7 +74,7 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-top: 10px;
     margin-right: 10px; 
     transition: background-color 0.3s, transform 0.2s;
@@ -93,7 +97,29 @@
     transform: scale(1.05);
 }
 
+.player-card .deleteButton:hover {
+    background-color: rgb(255, 4, 4);
+}
+
 .player-card button:focus {
     outline: none;
     box-shadow: 0 0 3px #007bff;
+}
+
+.player-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.player-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.player-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.player-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
