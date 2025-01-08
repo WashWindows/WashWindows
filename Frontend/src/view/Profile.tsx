@@ -1,50 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { User } from '../interface/User';
+import React, { useState } from 'react';
 import userPng from "../assets/user.jpg";
 import '../style/Profile.css';
-import Header from '../component/Header';
+import '../style/Form.css';
+import Header from '../component/ui/Header';
 import { asyncDelete, asyncPost, asyncPut } from '../utils/fetch';
-import { auth_api, user_api } from '../enum/api';
+import { user_api } from '../enum/api';
 import { useNavigate } from 'react-router-dom';
-const ProfilePage: React.FC = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
+import { handleLogout } from '../utils/logoutHandler';
+import { Button } from '../component/ui/Button';
+import { DeleteAccountForm, PasswordForm } from '../component/ui/Form';
+import PageContainer from '../component/ui/PageContainer';
+import { useAuth } from '../hooks/useAuth';
+
+export const Profile: React.FC = () => {
+    const { token, user, isLoggedIn, setUser, onLogout } = useAuth();
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isEditingUsername, setIsEditingUsername] = useState(false); // 控制 username 編輯狀態
-    const [editedUsername, setEditedUsername] = useState(''); // 儲存編輯中的 username
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [editedUsername, setEditedUsername] = useState('');
     const [passwordInput, setPasswordInput] = useState({
         oldPassword: '',
         newPassword: '',
         confirmPassword: '',
     });
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
     const navigate = useNavigate();
-    useEffect(() => {
-        if (token && savedUser) {
-            setIsLoggedIn(true);
-            setUser(JSON.parse(savedUser));
-        }
-    }, [token, savedUser]);
-
-    const handleLogout = async () => {
-        try {
-            await asyncPost(auth_api.logout, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-            })
-        } catch (error) {
-            console.log("logout error: ", error);
-        }
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setIsLoggedIn(false);
-        setUser(null);
-    };
 
     const handleUsernameEdit = async () => {
+        if (!token || !user) return;
+
         if (!editedUsername.trim()) {
             alert('使用者名稱不可為空白！');
             return;
@@ -60,19 +43,17 @@ const ProfilePage: React.FC = () => {
                     Authorization: `Bearer ${token}`
                 },
                 body: {
-                    _id: user?._id,
+                    _id: user._id,
                     username: editedUsername
                 },
             });
 
             if (response.ok) {
                 alert('使用者名稱已更新！');
-                setUser((prevUser) => (prevUser ? { ...prevUser, username: editedUsername } : null));
+                const updatedUser = { ...user, username: editedUsername };
+                setUser(updatedUser);
                 setIsEditingUsername(false); 
-                localStorage.setItem(
-                    'user',
-                    JSON.stringify({ ...user, username: editedUsername })
-                );
+                localStorage.setItem('user', JSON.stringify(updatedUser));
             } else if (response.status === 304) {
                 alert("新名稱與舊名稱相同")
                 setEditedUsername("");
@@ -90,6 +71,10 @@ const ProfilePage: React.FC = () => {
             alert('新密碼不能與舊密碼相同！');
             return false;
         }
+        if (passwordInput.newPassword.length < 6 || passwordInput.newPassword.length > 12) {
+            alert('新密碼必須介於6至12個字元');
+            return false;
+        }
         if (passwordInput.newPassword !== passwordInput.confirmPassword) {
             alert('新密碼與確認密碼不一致！');
             return false;
@@ -97,30 +82,46 @@ const ProfilePage: React.FC = () => {
         return true;
     };
 
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPasswordInput(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    const handlePasswordCancel = () => {
+        setIsPasswordModalOpen(false);
+        setPasswordInput({
+            oldPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        });
+    };
+
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!token || !user) return;
 
         if (!validPassword()) {
-            alert('新密碼與確認密碼不一致！');
             return;
         }
 
         try {
             const response = await asyncPost(user_api.updatePassword, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            body: {
-                _id: user?._id,
-                password: passwordInput.oldPassword,
-                new_password: passwordInput.newPassword
-            }
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: {
+                    _id: user._id,
+                    password: passwordInput.oldPassword,
+                    new_password: passwordInput.newPassword
+                }
             });
 
             if (response.ok) {
                 alert('密碼修改成功！請重新登入');
                 setIsPasswordModalOpen(false);
-                handleLogout();
+                handleLogout(onLogout);
                 navigate("/Login")
             } else {
                 alert('密碼修改失敗，請檢查舊密碼是否正確。');
@@ -130,14 +131,14 @@ const ProfilePage: React.FC = () => {
             alert('修改密碼失敗，請稍後再試。');
         }
     };
+
     const handleAletToLogin = () => {
         alert("請先登入");
-    }
+    };
+
     const handleDeleteAccount = async () => {
-        if (!window.confirm('您確定要刪除帳號嗎？此操作無法恢復。')) {
-            return;
-        }
-    
+        if (!token || !user) return;
+        
         if (!passwordInput.oldPassword) {
             alert('請輸入密碼確認刪除帳號。');
             return;
@@ -149,14 +150,14 @@ const ProfilePage: React.FC = () => {
                     Authorization: `Bearer ${token}`,
                 },
                 body: {
-                    _id: user?._id,
+                    _id: user._id,
                     password: passwordInput.oldPassword,
                 },
             });
     
             if (response.ok) {
                 alert('帳號已刪除，將自動登出。');
-                handleLogout();
+                handleLogout(onLogout);
                 navigate('/');
             } else {
                 const errorData = await response.json();
@@ -170,8 +171,8 @@ const ProfilePage: React.FC = () => {
 
     return (
         <>
-            <Header isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
-            <div className="profile-page">
+            <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
+            <PageContainer variant="dashboard">
                 <div className="profile-container">
                     <div className="image-container">
                         <label htmlFor="image-upload" className="image-label">
@@ -188,7 +189,7 @@ const ProfilePage: React.FC = () => {
                                         placeholder={user?.username}
                                         onChange={(e) => setEditedUsername(e.target.value)}
                                     />
-                                     <span
+                                    <span
                                         className="check-icon"
                                         onClick={() => {
                                             setIsEditingUsername(false);
@@ -215,78 +216,56 @@ const ProfilePage: React.FC = () => {
                         </div>
                     </div>
                     <div className="action-buttons">
-                        <button className="button" onClick={() => isLoggedIn ? setIsPasswordModalOpen(true) : handleAletToLogin()}>修改密碼</button>
-                        <button className="button" onClick={() => isLoggedIn ? setIsDeleteModalOpen(true) : handleAletToLogin()}>刪除帳號</button>
+                        <Button variant="secondary" onClick={() => isLoggedIn ? setIsPasswordModalOpen(true) : handleAletToLogin()}>
+                            修改密碼
+                        </Button>
+                        <Button variant="danger" onClick={() => isLoggedIn ? setIsDeleteModalOpen(true) : handleAletToLogin()}>
+                            刪除帳號
+                        </Button>
                     </div>
                 </div>
-            </div>
+            </PageContainer>
 
-            {/* 修改密碼 Modal */}
+            {/* Modals 保持不變 */}
             {isPasswordModalOpen && (
                 <div className="modal">
                     <div className="modal-content">
                         <h3>修改密碼</h3>
-                        <form onSubmit={handlePasswordSubmit}>
-                            <div className="modal-input-group">
-                                <label>舊密碼</label>
-                                <input
-                                    type="password"
-                                    value={passwordInput.oldPassword}
-                                    onChange={(e) => setPasswordInput({ ...passwordInput, oldPassword: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="modal-input-group">
-                                <label>新密碼</label>
-                                <input
-                                    type="password"
-                                    value={passwordInput.newPassword}
-                                    onChange={(e) => setPasswordInput({ ...passwordInput, newPassword: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="modal-input-group">
-                                <label>確認密碼</label>
-                                <input
-                                    type="password"
-                                    value={passwordInput.confirmPassword}
-                                    onChange={(e) => setPasswordInput({ ...passwordInput, confirmPassword: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="modal-actions">
-                                <button type="submit" className="button">確定</button>
-                                <button type="button" className="button cancel" onClick={() => setIsPasswordModalOpen(false)}>取消</button>
-                            </div>
-                        </form>
+                        <PasswordForm
+                            passwordInput={passwordInput}
+                            onSubmit={handlePasswordSubmit}
+                            onChange={handlePasswordChange}
+                            onCancel={handlePasswordCancel}
+                        />
                     </div>
                 </div>
             )}
 
-            {/* 刪除帳號 Modal */}
             {isDeleteModalOpen && (
                 <div className="modal">
                     <div className="modal-content">
                         <h3>確認刪除帳號</h3>
-                        <p>您確定要刪除帳號嗎？此操作無法恢復。</p>
-                        <div className="modal-input-group">
-                            <label>請輸入密碼以確認</label>
-                            <input
-                                type="password"
-                                value={passwordInput.oldPassword}
-                                onChange={(e) => setPasswordInput({ ...passwordInput, oldPassword: e.target.value })}
-                                placeholder="請輸入密碼"
-                            />
-                        </div>
-                        <div className="modal-actions">
-                            <button className="button" onClick={handleDeleteAccount}>刪除</button>
-                            <button className="button cancel" onClick={() => setIsDeleteModalOpen(false)}>取消</button>
-                        </div>
+                        <DeleteAccountForm
+                            password={passwordInput.oldPassword}
+                            onChange={(e) => setPasswordInput({
+                                ...passwordInput,
+                                oldPassword: e.target.value
+                            })}
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleDeleteAccount();
+                            }}
+                            onCancel={() => {
+                                setIsDeleteModalOpen(false);
+                                setPasswordInput({
+                                    ...passwordInput,
+                                    oldPassword: ''
+                                });
+                            }}
+                        />
                     </div>
                 </div>
             )}
         </>
     );
 };
-
-export default ProfilePage;

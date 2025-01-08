@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import '../style/Manager.css';
-import Header from '../component/Header';
+import Header from '../component/ui/Header';
 import { User } from '../interface/User';
 import { asyncGet, asyncDelete, asyncPut } from '../utils/fetch';
 import { admin_api } from '../enum/api';
+import { handleLogout } from '../utils/logoutHandler';
+import PageContainer from '../component/ui/PageContainer';
+import { useAuth } from '../hooks/useAuth';
 
-const Manager: React.FC = () => {
+export const Manager: React.FC = () => {
+    const { token, user, isLoggedIn, onLogout } = useAuth();
     const [players, setPlayers] = useState<User[]>([]);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-
     const [sortIndex, setSortIndex] = useState(0);
+
     const sortKeys: (keyof User | 'accuracy')[] = ['username', 'points', 'clicked', 'accuracy'];
     const sortKeyLabels: { [key: string]: string } = {
         username: '名稱',
@@ -20,36 +20,29 @@ const Manager: React.FC = () => {
         clicked: '點擊數',
         accuracy: '準確率'
     };
-
+    
     useEffect(() => {
-        if (token && savedUser) {
-            setIsLoggedIn(true);
-            setUser(JSON.parse(savedUser));
+        const fetchData = async () => {
+            if (!token) return;
+            
+            try {
+                const response = await asyncGet(admin_api.getAllUser, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setPlayers(response.body);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
 
-            const fetchData = async () => {
-                try {
-                    const response = await asyncGet(admin_api.getAllUser, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-                    setPlayers(response.body);
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                }
-            };
-            fetchData();
-        }
+        fetchData();
     }, [token]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setIsLoggedIn(false);
-        setUser(null);
-    };
-
     const handleResetScore = async (id: string) => {
+        if (!token) return;
+
         try {
             const response = await asyncPut(`${admin_api.resetUserPoints}?_id=${id}`, {
                 headers: {
@@ -74,6 +67,7 @@ const Manager: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
+        if (!token) return;
         if (!window.confirm('您確定要刪除該玩家嗎？此操作無法恢復。')) {
             return;
         }
@@ -127,28 +121,32 @@ const Manager: React.FC = () => {
 
     return (
         <>
-            <Header isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
-            <div className="manager-page">
-                <h1>玩家管理</h1>
-                <button className="toggle-sort-btn" onClick={handleSort}>
-                    排序（{sortKeyLabels[sortKeys[(sortIndex) % sortKeys.length]]}）
-                </button>
-                <div className="player-list">
-                    {players.map((player) => (
-                        <div key={player._id} className="player-card">
-                            <h4>{player.username}</h4>
-                            <p>ID: {player._id}</p>
-                            <p>{sortKeyLabels.points}: {player.points}</p>
-                            <p>{sortKeyLabels.clicked}: {player.clicked}</p>
-                            <p>{sortKeyLabels.accuracy}: {calculateAccuracy(player.points, player.clicked)}%</p>
-                            <button onClick={() => handleResetScore(player._id)}>重置分數</button>
-                            <button className="deleteButton" onClick={() => handleDelete(player._id)}>刪除</button>
-                        </div>
-                    ))}
+            <Header 
+                isLoggedIn={isLoggedIn} 
+                user={user} 
+                onLogout={() => handleLogout(onLogout)} 
+            />
+            <PageContainer variant="dashboard">
+                <div className="manager-page">
+                    <h1>玩家管理</h1>
+                    <button className="toggle-sort-btn" onClick={handleSort}>
+                        排序依據：{sortKeyLabels[sortKeys[(sortIndex) % sortKeys.length]]}
+                    </button>
+                    <div className="player-list">
+                        {players.map((player) => (
+                            <div key={player._id} className="player-card">
+                                <h4>{player.username}</h4>
+                                <p>ID: {player._id}</p>
+                                <p>{sortKeyLabels.points}: {player.points}</p>
+                                <p>{sortKeyLabels.clicked}: {player.clicked}</p>
+                                <p>{sortKeyLabels.accuracy}: {calculateAccuracy(player.points, player.clicked)}%</p>
+                                <button onClick={() => handleResetScore(player._id)}>重置分數</button>
+                                <button className="deleteButton" onClick={() => handleDelete(player._id)}>刪除</button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            </PageContainer>
         </>
     );
 };
-
-export default Manager;

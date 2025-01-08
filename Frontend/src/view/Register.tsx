@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../style/Register.css';
+import '../style/Auth.css';
 import { asyncPost } from '../utils/fetch';
 import { auth_api } from '../enum/api';
+import Header from '../component/ui/Header';
+import { handleLogout } from '../utils/logoutHandler';
+import { RegisterForm } from '../component/ui/Form';
+import PageContainer from '../component/ui/PageContainer';
+import { useAuth } from '../hooks/useAuth';
 
-const Register: React.FC = () => {
+export const Register: React.FC = () => {
+  const { isLoggedIn, user, onLogout } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -23,7 +29,6 @@ const Register: React.FC = () => {
     });
   };
 
-  // 驗證表單輸入
   const validInput = (): boolean => {
     if (!formData.email || !formData.username || !formData.password || !formData.confirmPassword) {
       setError('請填寫所有欄位');
@@ -48,7 +53,6 @@ const Register: React.FC = () => {
     e.preventDefault();
     setError(null);
 
-    // 驗證輸入
     if (!validInput()) return;
 
     setIsLoading(true);
@@ -68,9 +72,6 @@ const Register: React.FC = () => {
         setError(errorData.message || '註冊失敗');
         return;
       }
-
-      const data = await response.json();
-      console.log('註冊成功:', data);
       navigate('/');
     } catch (error) {
       if (error instanceof Error) {
@@ -84,50 +85,24 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="form-container">
-        <h2 className="title">註冊</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            name="email"
-            placeholder="電子郵件"
-            className="input-field"
-            value={formData.email}
+    <>
+      <Header 
+        isLoggedIn={isLoggedIn} 
+        user={user} 
+        onLogout={() => handleLogout(onLogout)} 
+      />
+      <PageContainer variant='auth'>
+        <div className="form-container">
+          <h2 className="title">註冊</h2>
+          <RegisterForm 
+            formData={formData} 
+            error={error} 
+            isLoading={isLoading} 
+            onSubmit={handleSubmit} 
             onChange={handleChange}
           />
-          <input
-            type="text"
-            name="username"
-            placeholder="帳號"
-            className="input-field"
-            value={formData.username}
-            onChange={handleChange}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="密碼"
-            className="input-field"
-            value={formData.password}
-            onChange={handleChange}
-          />
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="確認密碼"
-            className="input-field"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-          />
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="register-button" disabled={isLoading}>
-            {isLoading ? '註冊中...' : '註冊'}
-          </button>
-        </form>
-      </div>
-    </div>
+        </div>
+      </PageContainer>
+    </>
   );
 };
-
-export default Register;

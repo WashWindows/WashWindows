@@ -1,0 +1,30 @@
+.page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    min-height: 90vh;
+    width: 100%;
+}
+
+.page-container.auth {
+    justify-content: flex-start;
+    margin-top: 5%;
+}
+
+.page-container.game {
+    justify-content: flex-start;
+    overflow: hidden;
+}
+
+.page-container.dashboard {
+    justify-content: center;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .page-container {
+        padding: 10px;
+    }
+}
