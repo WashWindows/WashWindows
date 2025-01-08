@@ -4,6 +4,17 @@
     font-weight: normal;
     font-style: normal;
 }
+
+@font-face {
+    font-family: "noto-sans";
+    src: url("../assets/NotoSansTC-Medium.ttf");
+}
+
+@font-face {
+    font-family: "noto-sans-bold";
+    src: url("../assets/NotoSansTC-ExtraBold.ttf");
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -33,7 +44,7 @@ body {
     height: 100%;
     margin: 0;
     overflow: hidden;
-    font-family: "Font", Arial, sans-serif;
+    font-family: "noto-sans";
 }
 
 .index-container {
@@ -120,6 +131,7 @@ body {
     font-size: 50px;
     position: absolute;
     padding: 0.8rem;
+    color: white;
     background: rgba(255, 255, 255, 0.9);
     border: 2px solid #3498db;
     width: 60px;
@@ -180,7 +192,7 @@ body {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(52, 152, 219, 0.9);
+    background: #3498dbe6;
     color: white;
     padding: 0.8rem 1.5rem;
     border-radius: 30px;
