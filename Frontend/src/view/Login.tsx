@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../style/Login.css';
+import '../style/Auth.css';
 import { auth_api } from '../enum/api';
 import { asyncPost } from '../utils/fetch';
-import Header from '../component/Header';
+import Header from '../component/ui/Header';
 import { handleLogout } from '../utils/logoutHandler';
-import { LoginForm } from '../component/Form';
-import PageContainer from '../component/pageContainer';
+import { LoginForm } from '../component/ui/Form';
+import PageContainer from '../component/ui/PageContainer';
+import { useAuth } from '../hooks/useAuth';
 
-const Login: React.FC = () => {
+export const Login: React.FC = () => {
+  const { isLoggedIn, user, setUser, onLogout } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [error, setError] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,11 +23,6 @@ const Login: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-  };
-
-  const onLogout = () => {
-    setIsLoggedIn(false);
-    setUser(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,6 +39,7 @@ const Login: React.FC = () => {
       if (data.code === 200) {
         localStorage.setItem('token', data.body.token);
         localStorage.setItem('user', JSON.stringify(data.body.user));
+        setUser(data.body.user);
         navigate('/#');
       } else {
         setError(data.message || '登入失敗，請檢查帳號密碼');
@@ -56,7 +52,11 @@ const Login: React.FC = () => {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
+      <Header 
+        isLoggedIn={isLoggedIn} 
+        user={user} 
+        onLogout={() => handleLogout(onLogout)} 
+      />
       <PageContainer variant='auth'>
         <div className="form-container">
           <h2 className="title">登入</h2>
@@ -72,5 +72,3 @@ const Login: React.FC = () => {
     </>
   );
 };
-
-export default Login;

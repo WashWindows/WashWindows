@@ -1,36 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import '../style/Rank.css';
-import { User } from '../interface/User';
-import Header from '../component/Header';
+import Header from '../component/ui/Header';
 import { asyncGet } from '../utils/fetch';
 import { user_api } from '../enum/api';
 import { RankItem } from '../interface/RankItem';
 import { handleLogout } from '../utils/logoutHandler';
-import PageContainer from '../component/pageContainer';
+import PageContainer from '../component/ui/PageContainer';
+import { useAuth } from '../hooks/useAuth';
 
 export const Rank: React.FC = () => {
+    const { token, user, isLoggedIn, onLogout } = useAuth();
     const [rank, setRank] = useState<RankItem[]>([]);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<'points' | 'username'>('points');
 
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
-    const onLogout = () => {
-        setIsLoggedIn(false);
-        setUser(null);
-    };
-
     useEffect(() => {
-        if (token && savedUser) {
-            setIsLoggedIn(true);
-            setUser(JSON.parse(savedUser));
-        }
-
         const fetchRankData = async () => {
+            if (!token) return;
+            
             try {
                 setIsLoading(true);
                 const response = await asyncGet(user_api.getAllPoints, {
@@ -75,7 +63,11 @@ export const Rank: React.FC = () => {
 
     return (
         <>
-            <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
+            <Header 
+                isLoggedIn={isLoggedIn} 
+                user={user} 
+                onLogout={() => handleLogout(onLogout)} 
+            />
             <PageContainer variant="dashboard">
                 <h1>排行榜</h1>
                 <button className="toggle-sort-btn" onClick={toggleSort}>

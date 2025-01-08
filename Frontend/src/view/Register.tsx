@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../style/Register.css';
+import '../style/Auth.css';
 import { asyncPost } from '../utils/fetch';
 import { auth_api } from '../enum/api';
-import Header from '../component/Header';
+import Header from '../component/ui/Header';
 import { handleLogout } from '../utils/logoutHandler';
-import { RegisterForm } from '../component/Form';
-import PageContainer from '../component/pageContainer';
+import { RegisterForm } from '../component/ui/Form';
+import PageContainer from '../component/ui/PageContainer';
+import { useAuth } from '../hooks/useAuth';
 
-const Register: React.FC = () => {
+export const Register: React.FC = () => {
+  const { isLoggedIn, user, onLogout } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -17,8 +19,6 @@ const Register: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
 
@@ -29,12 +29,6 @@ const Register: React.FC = () => {
     });
   };
 
-  const onLogout = () => {
-    setIsLoggedIn(false);
-    setUser(null);
-  };
-
-  // 驗證表單輸入
   const validInput = (): boolean => {
     if (!formData.email || !formData.username || !formData.password || !formData.confirmPassword) {
       setError('請填寫所有欄位');
@@ -78,9 +72,6 @@ const Register: React.FC = () => {
         setError(errorData.message || '註冊失敗');
         return;
       }
-
-      const data = await response.json();
-      console.log('註冊成功:', data);
       navigate('/');
     } catch (error) {
       if (error instanceof Error) {
@@ -95,15 +86,23 @@ const Register: React.FC = () => {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
+      <Header 
+        isLoggedIn={isLoggedIn} 
+        user={user} 
+        onLogout={() => handleLogout(onLogout)} 
+      />
       <PageContainer variant='auth'>
         <div className="form-container">
           <h2 className="title">註冊</h2>
-          <RegisterForm formData={formData} error={error} isLoading={isLoading} onSubmit={handleSubmit} onChange={handleChange}></RegisterForm>
+          <RegisterForm 
+            formData={formData} 
+            error={error} 
+            isLoading={isLoading} 
+            onSubmit={handleSubmit} 
+            onChange={handleChange}
+          />
         </div>
       </PageContainer>
     </>
   );
 };
-
-export default Register;

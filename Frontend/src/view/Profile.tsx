@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { User } from '../interface/User';
+import React, { useState } from 'react';
 import userPng from "../assets/user.jpg";
 import '../style/Profile.css';
 import '../style/Form.css';
-import Header from '../component/Header';
+import Header from '../component/ui/Header';
 import { asyncDelete, asyncPost, asyncPut } from '../utils/fetch';
 import { user_api } from '../enum/api';
 import { useNavigate } from 'react-router-dom';
 import { handleLogout } from '../utils/logoutHandler';
-import { Button } from '../component/Button';
-import { DeleteAccountForm, PasswordForm } from '../component/Form';
-import PageContainer from '../component/pageContainer';
+import { Button } from '../component/ui/Button';
+import { DeleteAccountForm, PasswordForm } from '../component/ui/Form';
+import PageContainer from '../component/ui/PageContainer';
+import { useAuth } from '../hooks/useAuth';
 
-const ProfilePage: React.FC = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
+export const Profile: React.FC = () => {
+    const { token, user, isLoggedIn, setUser, onLogout } = useAuth();
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isEditingUsername, setIsEditingUsername] = useState(false);
@@ -24,23 +23,11 @@ const ProfilePage: React.FC = () => {
         newPassword: '',
         confirmPassword: '',
     });
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
     const navigate = useNavigate();
 
-    const onLogout = () => {
-        setIsLoggedIn(false);
-        setUser(null);
-    };
-
-    useEffect(() => {
-        if (token && savedUser) {
-            setIsLoggedIn(true);
-            setUser(JSON.parse(savedUser));
-        }
-    }, [token, savedUser]);
-
     const handleUsernameEdit = async () => {
+        if (!token || !user) return;
+
         if (!editedUsername.trim()) {
             alert('使用者名稱不可為空白！');
             return;
@@ -56,19 +43,17 @@ const ProfilePage: React.FC = () => {
                     Authorization: `Bearer ${token}`
                 },
                 body: {
-                    _id: user?._id,
+                    _id: user._id,
                     username: editedUsername
                 },
             });
 
             if (response.ok) {
                 alert('使用者名稱已更新！');
-                setUser((prevUser) => (prevUser ? { ...prevUser, username: editedUsername } : null));
+                const updatedUser = { ...user, username: editedUsername };
+                setUser(updatedUser);
                 setIsEditingUsername(false); 
-                localStorage.setItem(
-                    'user',
-                    JSON.stringify({ ...user, username: editedUsername })
-                );
+                localStorage.setItem('user', JSON.stringify(updatedUser));
             } else if (response.status === 304) {
                 alert("新名稱與舊名稱相同")
                 setEditedUsername("");
@@ -115,6 +100,7 @@ const ProfilePage: React.FC = () => {
 
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!token || !user) return;
 
         if (!validPassword()) {
             return;
@@ -126,7 +112,7 @@ const ProfilePage: React.FC = () => {
                     Authorization: `Bearer ${token}`
                 },
                 body: {
-                    _id: user?._id,
+                    _id: user._id,
                     password: passwordInput.oldPassword,
                     new_password: passwordInput.newPassword
                 }
@@ -151,6 +137,8 @@ const ProfilePage: React.FC = () => {
     };
 
     const handleDeleteAccount = async () => {
+        if (!token || !user) return;
+        
         if (!passwordInput.oldPassword) {
             alert('請輸入密碼確認刪除帳號。');
             return;
@@ -162,7 +150,7 @@ const ProfilePage: React.FC = () => {
                     Authorization: `Bearer ${token}`,
                 },
                 body: {
-                    _id: user?._id,
+                    _id: user._id,
                     password: passwordInput.oldPassword,
                 },
             });
@@ -281,5 +269,3 @@ const ProfilePage: React.FC = () => {
         </>
     );
 };
-
-export default ProfilePage;

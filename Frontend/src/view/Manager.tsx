@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import '../style/Manager.css';
-import Header from '../component/Header';
+import Header from '../component/ui/Header';
 import { User } from '../interface/User';
 import { asyncGet, asyncDelete, asyncPut } from '../utils/fetch';
 import { admin_api } from '../enum/api';
 import { handleLogout } from '../utils/logoutHandler';
-import PageContainer from '../component/pageContainer';
+import PageContainer from '../component/ui/PageContainer';
+import { useAuth } from '../hooks/useAuth';
 
-const Manager: React.FC = () => {
+export const Manager: React.FC = () => {
+    const { token, user, isLoggedIn, onLogout } = useAuth();
     const [players, setPlayers] = useState<User[]>([]);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-
     const [sortIndex, setSortIndex] = useState(0);
+
     const sortKeys: (keyof User | 'accuracy')[] = ['username', 'points', 'clicked', 'accuracy'];
     const sortKeyLabels: { [key: string]: string } = {
         username: '名稱',
@@ -22,33 +20,29 @@ const Manager: React.FC = () => {
         clicked: '點擊數',
         accuracy: '準確率'
     };
-    const onLogout = () => {
-        setIsLoggedIn(false);
-        setUser(null);
-    };
     
     useEffect(() => {
-        if (token && savedUser) {
-            setIsLoggedIn(true);
-            setUser(JSON.parse(savedUser));
+        const fetchData = async () => {
+            if (!token) return;
+            
+            try {
+                const response = await asyncGet(admin_api.getAllUser, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setPlayers(response.body);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
 
-            const fetchData = async () => {
-                try {
-                    const response = await asyncGet(admin_api.getAllUser, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-                    setPlayers(response.body);
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                }
-            };
-            fetchData();
-        }
+        fetchData();
     }, [token]);
 
     const handleResetScore = async (id: string) => {
+        if (!token) return;
+
         try {
             const response = await asyncPut(`${admin_api.resetUserPoints}?_id=${id}`, {
                 headers: {
@@ -73,6 +67,7 @@ const Manager: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
+        if (!token) return;
         if (!window.confirm('您確定要刪除該玩家嗎？此操作無法恢復。')) {
             return;
         }
@@ -126,7 +121,11 @@ const Manager: React.FC = () => {
 
     return (
         <>
-            <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
+            <Header 
+                isLoggedIn={isLoggedIn} 
+                user={user} 
+                onLogout={() => handleLogout(onLogout)} 
+            />
             <PageContainer variant="dashboard">
                 <div className="manager-page">
                     <h1>玩家管理</h1>
@@ -151,5 +150,3 @@ const Manager: React.FC = () => {
         </>
     );
 };
-
-export default Manager;
