@@ -9,6 +9,7 @@ import { user_api } from '../enum/api';
 import Header from '../component/Header';
 import { handleLogout } from '../utils/logoutHandler';
 import RankList from '../component/RankList';
+import Scoreboard from '../component/Scoreboard';
 import wipeAudio from '../assets/wipe.mp3';
 import wrongAudio from '../assets/wrong.mp3';
 
@@ -30,10 +31,12 @@ export const WashWindowsGame: React.FC = () => {
   const [isExiting, setIsExiting] = useState<boolean>(false);
   const token = localStorage.getItem('token');
   const savedUser = localStorage.getItem('user');
+
   const onLogout = () => {
     setIsLoggedIn(false);
     setUser(null);
   };
+
   useEffect(() => {
     if (token && savedUser) {
       const parsedUser = JSON.parse(savedUser);
@@ -133,7 +136,7 @@ export const WashWindowsGame: React.FC = () => {
 
   const generateRandomKey = () => {
     const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-    const randomKey = keys[Math.floor(Math.random() * keys.length)]; //Math.floor(Math.random() * keys.length)
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
     const newPosition = generateDirtyPosition(randomKey);
     setDirtyVisible(false);
 
@@ -202,61 +205,61 @@ export const WashWindowsGame: React.FC = () => {
     };
   }, [currentKey]);
 
-  const calculateAccuracy = (points: number, clicked: number) => {
-    if (!clicked) return "0.00";
-    return ((points / clicked) * 100).toFixed(2);
-  };
-
   return (
     <div className="index-container">
-      <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
+      <Header 
+        isLoggedIn={isLoggedIn} 
+        user={user} 
+        onLogout={() => handleLogout(onLogout)} 
+      />
       <RankList isOpen={isPanelOpen} togglePanel={togglePanel} />
-        <div className="game-area">
-          <img className="window" src={Window} alt="Window" />
+      <div className="game-area">
+        <img className="window" src={Window} alt="Window" />
+        <div
+          className="rag"
+          style={{
+            top: `${position.top}%`,
+            left: `${position.left}%`,
+          }}
+        >
+          <img className="rag" src={Rag} alt="rag" />
+        </div>
+        {dirtyVisible && (
           <div
-            className="rag"
+            className="dirty"
             style={{
-              top: `${position.top}%`,
-              left: `${position.left}%`,
+              top: `${dirtyPosition.top}%`,
+              left: `${dirtyPosition.left}%`,
             }}
           >
-            <img className="rag" src={Rag} alt="rag" />
+            <img src={Dirty} alt="dirty" className="dirty-animation" />
           </div>
-          {dirtyVisible && (
-            <div
-              className="dirty"
-              style={{
-                top: `${dirtyPosition.top}%`,
-                left: `${dirtyPosition.left}%`,
-              }}
+        )}
+        <div className="controls">
+          {["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].map((key) => (
+            <button
+              key={key}
+              className={`control-button ${key === currentKey ? 'current' : ''} ${wrongAttempt && key === currentKey ? 'wrong' : ''}`}
             >
-              <img src={Dirty} alt="dirty" className="dirty-animation" />
-            </div>
-          )}
-          <div className="controls">
-            {["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].map((key) => (
-              <button
-                key={key}
-                className={`control-button ${key === currentKey ? 'current' : ''} ${wrongAttempt && key === currentKey ? 'wrong' : ''}`}
-              >
-                {key === "ArrowUp" && " ⭡"}
-                {key === "ArrowDown" && "⭣"}
-                {key === "ArrowLeft" && "⭠"}
-                {key === "ArrowRight" && "⭢"}
-              </button> 
-            ))}
+              {key === "ArrowUp" && " ⭡"}
+              {key === "ArrowDown" && "⭣"}
+              {key === "ArrowLeft" && "⭠"}
+              {key === "ArrowRight" && "⭢"}
+            </button> 
+          ))}
+        </div>
+        {updateStatus && (
+          <div 
+            className={`update-status ${isExiting ? 'exit' : ''}`}  
+            style={{ 
+              backgroundColor: updateStatus === "請先登入！" ? '#ff2222' : '#3498dbe6' 
+            }}
+          >
+            {updateStatus}
           </div>
-          {updateStatus && (
-            <div className={`update-status ${isExiting ? 'exit' : ''}`}  style={{ backgroundColor: updateStatus === "請先登入！" ? '#ff2222' : '#3498dbe6' }}>
-              {updateStatus}
-            </div>
-          )}
-        </div>
-        <div className='scoreboard'>
-          <h3>分數:{points}</h3>
-          <h3>點擊次數:{clicked}</h3>
-          <h3>準確率:{calculateAccuracy(points, clicked)}%</h3>
-        </div>
+        )}
+      </div>
+      <Scoreboard points={points} clicked={clicked} />
     </div>
   );
 };
