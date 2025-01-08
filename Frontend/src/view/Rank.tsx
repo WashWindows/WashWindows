@@ -5,6 +5,7 @@ import Header from '../component/Header';
 import { asyncGet } from '../utils/fetch';
 import { user_api } from '../enum/api';
 import { RankItem } from '../interface/RankItem';
+import { handleLogout } from '../utils/logoutHandler';
 
 export const Rank: React.FC = () => {
     const [rank, setRank] = useState<RankItem[]>([]);
@@ -12,10 +13,15 @@ export const Rank: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [sortBy, setSortBy] = useState<'points' | 'username'>('points'); // 排序方式
+    const [sortBy, setSortBy] = useState<'points' | 'username'>('points');
 
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
+    
+    const onLogout = () => {
+        setIsLoggedIn(false);
+        setUser(null);
+    };
 
     useEffect(() => {
         if (token && savedUser) {
@@ -35,7 +41,7 @@ export const Rank: React.FC = () => {
                 if (response.code === 200 && Array.isArray(response.body)) {
                     const sortedRank = response.body.sort(
                         (a: RankItem, b: RankItem) => b.points - a.points
-                    ); // 初始以分數排序
+                    );
                     setRank(sortedRank);
                 } else {
                     setError('無法載入排行榜數據');
@@ -51,22 +57,15 @@ export const Rank: React.FC = () => {
         fetchRankData();
     }, [token]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setIsLoggedIn(false);
-        setUser(null);
-    };
-
     const toggleSort = () => {
         const newSortBy = sortBy === 'points' ? 'username' : 'points';
         setSortBy(newSortBy);
 
         const sortedRank = [...rank].sort((a, b) => {
             if (newSortBy === 'points') {
-                return b.points - a.points; // 按分數排序
+                return b.points - a.points;
             } else {
-                return a.username.localeCompare(b.username, 'zh-Hant'); // 按名稱排序
+                return a.username.localeCompare(b.username, 'zh-Hant');
             }
         });
 
@@ -75,7 +74,7 @@ export const Rank: React.FC = () => {
 
     return (
         <>
-            <Header isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
+            <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
             <div className="rank-page">
                 <h1>排行榜</h1>
                 <button className="toggle-sort-btn" onClick={toggleSort}>
@@ -94,7 +93,10 @@ export const Rank: React.FC = () => {
                                 <span className="points">分數</span>
                             </div>
                             {rank.map((item, index) => (
-                                <div key={item._id} className="rank-item">
+                                <div 
+                                    key={item._id} 
+                                    className={`rank-item ${item.username === user?.username ? 'current-user' : ''}`}
+                                >
                                     <span className="rank-number">{index + 1}</span>
                                     <span className="username">{item.username}</span>
                                     <span className="points">{item.points}</span>

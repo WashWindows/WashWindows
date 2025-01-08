@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import '../style/Register.css';
 import { asyncPost } from '../utils/fetch';
 import { auth_api } from '../enum/api';
+import Header from '../component/Header';
+import { handleLogout } from '../utils/logoutHandler';
+import { Button } from '../component/Button';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +16,8 @@ const Register: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
 
@@ -21,6 +26,11 @@ const Register: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const onLogout = () => {
+    setIsLoggedIn(false);
+    setUser(null);
   };
 
   // 驗證表單輸入
@@ -48,7 +58,6 @@ const Register: React.FC = () => {
     e.preventDefault();
     setError(null);
 
-    // 驗證輸入
     if (!validInput()) return;
 
     setIsLoading(true);
@@ -84,49 +93,56 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="form-container">
-        <h2 className="title">註冊</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            name="email"
-            placeholder="電子郵件"
-            className="input-field"
-            value={formData.email}
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            name="username"
-            placeholder="帳號"
-            className="input-field"
-            value={formData.username}
-            onChange={handleChange}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="密碼"
-            className="input-field"
-            value={formData.password}
-            onChange={handleChange}
-          />
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="確認密碼"
-            className="input-field"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-          />
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="register-button" disabled={isLoading}>
-            {isLoading ? '註冊中...' : '註冊'}
-          </button>
-        </form>
+    <>
+      <Header 
+        isLoggedIn={isLoggedIn} 
+        user={user} 
+        onLogout={() => handleLogout(onLogout)} 
+      />
+      <div className="register-container">
+        <div className="form-container">
+          <h2 className="title">註冊</h2>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="email"
+              name="email"
+              placeholder="電子郵件"
+              className="input-field"
+              value={formData.email}
+              onChange={handleChange}
+            />
+            <input
+              type="text"
+              name="username"
+              placeholder="帳號"
+              className="input-field"
+              value={formData.username}
+              onChange={handleChange}
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="密碼"
+              className="input-field"
+              value={formData.password}
+              onChange={handleChange}
+            />
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="確認密碼"
+              className="input-field"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+            {error && <p className="error-message">{error}</p>}
+            <Button type="submit" variant="primary" disabled={isLoading}>
+              {isLoading ? '註冊中...' : '註冊'}
+            </Button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

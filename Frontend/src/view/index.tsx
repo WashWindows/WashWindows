@@ -7,6 +7,7 @@ import '../style/index.css';
 import { asyncPut } from '../utils/fetch';
 import { user_api } from '../enum/api';
 import Header from '../component/Header';
+import { handleLogout } from '../utils/logoutHandler';
 import RankList from '../component/RankList';
 import wipeAudio from '../assets/wipe.mp3';
 import wrongAudio from '../assets/wrong.mp3';
@@ -29,7 +30,10 @@ export const WashWindowsGame: React.FC = () => {
   const [isExiting, setIsExiting] = useState<boolean>(false);
   const token = localStorage.getItem('token');
   const savedUser = localStorage.getItem('user');
-
+  const onLogout = () => {
+    setIsLoggedIn(false);
+    setUser(null);
+  };
   useEffect(() => {
     if (token && savedUser) {
       const parsedUser = JSON.parse(savedUser);
@@ -101,18 +105,6 @@ export const WashWindowsGame: React.FC = () => {
     }, 1000);
     return () => clearInterval(interval);
   }, [points, clicked, isUpdating]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setIsLoggedIn(false);
-    setUser(null);
-    setPoints(0);
-    setPointsBuffer(0);
-    setClicked(0);
-    setClickedBuffer(0);
-    window.location.reload();
-  };
 
   const handleScoreIncrease = () => {
     setPoints(prev => prev + 1);
@@ -217,7 +209,7 @@ export const WashWindowsGame: React.FC = () => {
 
   return (
     <div className="index-container">
-      <Header isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
+      <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
       <RankList isOpen={isPanelOpen} togglePanel={togglePanel} />
         <div className="game-area">
           <img className="window" src={Window} alt="Window" />

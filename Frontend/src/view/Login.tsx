@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import '../style/Login.css';
 import { auth_api } from '../enum/api';
 import { asyncPost } from '../utils/fetch';
+import Header from '../component/Header';
+import { handleLogout } from '../utils/logoutHandler';
+import { Button } from '../component/Button';
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +13,8 @@ const Login: React.FC = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,6 +22,11 @@ const Login: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const onLogout = () => {
+    setIsLoggedIn(false);
+    setUser(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +41,6 @@ const Login: React.FC = () => {
       const data = await response.json();
       
       if (data.code === 200) {
-        // 儲存 token 和使用者資訊到 localStorage
         localStorage.setItem('token', data.body.token);
         localStorage.setItem('user', JSON.stringify(data.body.user));
         navigate('/#');
@@ -45,35 +54,42 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="form-container">
-        <h2 className="title">登入</h2>
-        {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            name="email"
-            placeholder="電子郵件"
-            className="input-field"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="密碼"
-            className="input-field"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-          <button type="submit" className="login-button">
-            登入
-          </button>
-        </form>
+    <>
+      <Header 
+        isLoggedIn={isLoggedIn} 
+        user={user} 
+        onLogout={() => handleLogout(onLogout)} 
+      />
+      <div className="login-container">
+        <div className="form-container">
+          <h2 className="title">登入</h2>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="email"
+              name="email"
+              placeholder="電子郵件"
+              className="input-field"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="密碼"
+              className="input-field"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            {error && <div className="error-message">{error}</div>}
+            <Button type="submit" variant="primary">
+              登入
+            </Button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -4,8 +4,10 @@ import userPng from "../assets/user.jpg";
 import '../style/Profile.css';
 import Header from '../component/Header';
 import { asyncDelete, asyncPost, asyncPut } from '../utils/fetch';
-import { auth_api, user_api } from '../enum/api';
+import { user_api } from '../enum/api';
 import { useNavigate } from 'react-router-dom';
+import { handleLogout } from '../utils/logoutHandler';
+import { Button } from '../component/Button';
 const ProfilePage: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState<User | null>(null);
@@ -20,6 +22,12 @@ const ProfilePage: React.FC = () => {
     });
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
+
+    const onLogout = () => {
+        setIsLoggedIn(false);
+        setUser(null);
+    };
+
     const navigate = useNavigate();
     useEffect(() => {
         if (token && savedUser) {
@@ -27,22 +35,6 @@ const ProfilePage: React.FC = () => {
             setUser(JSON.parse(savedUser));
         }
     }, [token, savedUser]);
-
-    const handleLogout = async () => {
-        try {
-            await asyncPost(auth_api.logout, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-            })
-        } catch (error) {
-            console.log("logout error: ", error);
-        }
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setIsLoggedIn(false);
-        setUser(null);
-    };
 
     const handleUsernameEdit = async () => {
         if (!editedUsername.trim()) {
@@ -90,7 +82,7 @@ const ProfilePage: React.FC = () => {
             alert('新密碼不能與舊密碼相同！');
             return false;
         }
-        if (passwordInput.newPassword !== passwordInput.confirmPassword) {
+        else if (passwordInput.newPassword !== passwordInput.confirmPassword) {
             alert('新密碼與確認密碼不一致！');
             return false;
         }
@@ -101,7 +93,6 @@ const ProfilePage: React.FC = () => {
         e.preventDefault();
 
         if (!validPassword()) {
-            alert('新密碼與確認密碼不一致！');
             return;
         }
 
@@ -120,7 +111,7 @@ const ProfilePage: React.FC = () => {
             if (response.ok) {
                 alert('密碼修改成功！請重新登入');
                 setIsPasswordModalOpen(false);
-                handleLogout();
+                handleLogout(onLogout);
                 navigate("/Login")
             } else {
                 alert('密碼修改失敗，請檢查舊密碼是否正確。');
@@ -156,7 +147,7 @@ const ProfilePage: React.FC = () => {
     
             if (response.ok) {
                 alert('帳號已刪除，將自動登出。');
-                handleLogout();
+                handleLogout(onLogout);
                 navigate('/');
             } else {
                 const errorData = await response.json();
@@ -170,7 +161,7 @@ const ProfilePage: React.FC = () => {
 
     return (
         <>
-            <Header isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
+            <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
             <div className="profile-page">
                 <div className="profile-container">
                     <div className="image-container">
@@ -215,8 +206,8 @@ const ProfilePage: React.FC = () => {
                         </div>
                     </div>
                     <div className="action-buttons">
-                        <button className="button" onClick={() => isLoggedIn ? setIsPasswordModalOpen(true) : handleAletToLogin()}>修改密碼</button>
-                        <button className="button" onClick={() => isLoggedIn ? setIsDeleteModalOpen(true) : handleAletToLogin()}>刪除帳號</button>
+                        <Button variant="secondary" onClick={() => isLoggedIn ? setIsPasswordModalOpen(true) : handleAletToLogin()}>修改密碼</Button>
+                        <Button variant="danger" onClick={() => isLoggedIn ? setIsDeleteModalOpen(true) : handleAletToLogin()}>刪除帳號</Button>
                     </div>
                 </div>
             </div>
@@ -243,6 +234,8 @@ const ProfilePage: React.FC = () => {
                                     value={passwordInput.newPassword}
                                     onChange={(e) => setPasswordInput({ ...passwordInput, newPassword: e.target.value })}
                                     required
+                                    minLength={6}
+                                    maxLength={12}
                                 />
                             </div>
                             <div className="modal-input-group">
@@ -252,11 +245,31 @@ const ProfilePage: React.FC = () => {
                                     value={passwordInput.confirmPassword}
                                     onChange={(e) => setPasswordInput({ ...passwordInput, confirmPassword: e.target.value })}
                                     required
+                                    minLength={6}
+                                    maxLength={12}
                                 />
                             </div>
                             <div className="modal-actions">
-                                <button type="submit" className="button">確定</button>
-                                <button type="button" className="button cancel" onClick={() => setIsPasswordModalOpen(false)}>取消</button>
+                                <Button 
+                                    type="submit" 
+                                    variant="secondary"
+                                >
+                                    確定
+                                </Button>
+                                <Button 
+                                    type="button"
+                                    variant="danger"
+                                    onClick={() => {
+                                        setIsPasswordModalOpen(false);
+                                        setPasswordInput({
+                                            oldPassword: '',
+                                            newPassword: '',
+                                            confirmPassword: ''
+                                        });
+                                    }}
+                                >
+                                    取消
+                                </Button>
                             </div>
                         </form>
                     </div>
@@ -279,8 +292,8 @@ const ProfilePage: React.FC = () => {
                             />
                         </div>
                         <div className="modal-actions">
-                            <button className="button" onClick={handleDeleteAccount}>刪除</button>
-                            <button className="button cancel" onClick={() => setIsDeleteModalOpen(false)}>取消</button>
+                            <Button variant="secondary" onClick={handleDeleteAccount}>刪除</Button>
+                            <Button variant="danger" onClick={() => [setIsDeleteModalOpen(false), setPasswordInput({ ...passwordInput, oldPassword: "" })]}>取消</Button>
                         </div>
                     </div>
                 </div>

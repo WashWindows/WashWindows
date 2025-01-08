@@ -4,6 +4,7 @@ import Header from '../component/Header';
 import { User } from '../interface/User';
 import { asyncGet, asyncDelete, asyncPut } from '../utils/fetch';
 import { admin_api } from '../enum/api';
+import { handleLogout } from '../utils/logoutHandler';
 
 const Manager: React.FC = () => {
     const [players, setPlayers] = useState<User[]>([]);
@@ -20,7 +21,11 @@ const Manager: React.FC = () => {
         clicked: '點擊數',
         accuracy: '準確率'
     };
-
+    const onLogout = () => {
+        setIsLoggedIn(false);
+        setUser(null);
+    };
+    
     useEffect(() => {
         if (token && savedUser) {
             setIsLoggedIn(true);
@@ -41,13 +46,6 @@ const Manager: React.FC = () => {
             fetchData();
         }
     }, [token]);
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setIsLoggedIn(false);
-        setUser(null);
-    };
 
     const handleResetScore = async (id: string) => {
         try {
@@ -127,11 +125,11 @@ const Manager: React.FC = () => {
 
     return (
         <>
-            <Header isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
+            <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
             <div className="manager-page">
                 <h1>玩家管理</h1>
                 <button className="toggle-sort-btn" onClick={handleSort}>
-                    排序（{sortKeyLabels[sortKeys[(sortIndex) % sortKeys.length]]}）
+                    排序依據：{sortKeyLabels[sortKeys[(sortIndex) % sortKeys.length]]}
                 </button>
                 <div className="player-list">
                     {players.map((player) => (
