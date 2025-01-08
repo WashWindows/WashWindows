@@ -5,7 +5,7 @@ import { auth_api } from '../enum/api';
 import { asyncPost } from '../utils/fetch';
 import Header from '../component/Header';
 import { handleLogout } from '../utils/logoutHandler';
-import { Button } from '../component/Button';
+import { LoginForm } from '../component/Form';
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -63,30 +63,13 @@ const Login: React.FC = () => {
       <div className="login-container">
         <div className="form-container">
           <h2 className="title">登入</h2>
-          <form onSubmit={handleSubmit}>
-            <input
-              type="email"
-              name="email"
-              placeholder="電子郵件"
-              className="input-field"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="password"
-              name="password"
-              placeholder="密碼"
-              className="input-field"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-            {error && <div className="error-message">{error}</div>}
-            <Button type="submit" variant="primary">
-              登入
-            </Button>
-          </form>
+          <LoginForm
+            email={formData.email}
+            password={formData.password}
+            error={error}
+            onSubmit={handleSubmit}
+            onChange={handleChange}
+          />
         </div>
       </div>
     </>

@@ -2,19 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { User } from '../interface/User';
 import userPng from "../assets/user.jpg";
 import '../style/Profile.css';
+import '../style/Form.css';
 import Header from '../component/Header';
 import { asyncDelete, asyncPost, asyncPut } from '../utils/fetch';
 import { user_api } from '../enum/api';
 import { useNavigate } from 'react-router-dom';
 import { handleLogout } from '../utils/logoutHandler';
 import { Button } from '../component/Button';
+import { DeleteAccountForm, PasswordForm } from '../component/Form';
+
 const ProfilePage: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState<User | null>(null);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isEditingUsername, setIsEditingUsername] = useState(false); // 控制 username 編輯狀態
-    const [editedUsername, setEditedUsername] = useState(''); // 儲存編輯中的 username
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [editedUsername, setEditedUsername] = useState('');
     const [passwordInput, setPasswordInput] = useState({
         oldPassword: '',
         newPassword: '',
@@ -22,13 +25,13 @@ const ProfilePage: React.FC = () => {
     });
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
+    const navigate = useNavigate();
 
     const onLogout = () => {
         setIsLoggedIn(false);
         setUser(null);
     };
 
-    const navigate = useNavigate();
     useEffect(() => {
         if (token && savedUser) {
             setIsLoggedIn(true);
@@ -82,11 +85,31 @@ const ProfilePage: React.FC = () => {
             alert('新密碼不能與舊密碼相同！');
             return false;
         }
-        else if (passwordInput.newPassword !== passwordInput.confirmPassword) {
+        if (passwordInput.newPassword.length < 6 || passwordInput.newPassword.length > 12) {
+            alert('新密碼必須介於6至12個字元');
+            return false;
+        }
+        if (passwordInput.newPassword !== passwordInput.confirmPassword) {
             alert('新密碼與確認密碼不一致！');
             return false;
         }
         return true;
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPasswordInput(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    const handlePasswordCancel = () => {
+        setIsPasswordModalOpen(false);
+        setPasswordInput({
+            oldPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        });
     };
 
     const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -98,14 +121,14 @@ const ProfilePage: React.FC = () => {
 
         try {
             const response = await asyncPost(user_api.updatePassword, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            body: {
-                _id: user?._id,
-                password: passwordInput.oldPassword,
-                new_password: passwordInput.newPassword
-            }
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: {
+                    _id: user?._id,
+                    password: passwordInput.oldPassword,
+                    new_password: passwordInput.newPassword
+                }
             });
 
             if (response.ok) {
@@ -121,14 +144,12 @@ const ProfilePage: React.FC = () => {
             alert('修改密碼失敗，請稍後再試。');
         }
     };
+
     const handleAletToLogin = () => {
         alert("請先登入");
-    }
+    };
+
     const handleDeleteAccount = async () => {
-        if (!window.confirm('您確定要刪除帳號嗎？此操作無法恢復。')) {
-            return;
-        }
-    
         if (!passwordInput.oldPassword) {
             alert('請輸入密碼確認刪除帳號。');
             return;
@@ -179,7 +200,7 @@ const ProfilePage: React.FC = () => {
                                         placeholder={user?.username}
                                         onChange={(e) => setEditedUsername(e.target.value)}
                                     />
-                                     <span
+                                    <span
                                         className="check-icon"
                                         onClick={() => {
                                             setIsEditingUsername(false);
@@ -206,8 +227,12 @@ const ProfilePage: React.FC = () => {
                         </div>
                     </div>
                     <div className="action-buttons">
-                        <Button variant="secondary" onClick={() => isLoggedIn ? setIsPasswordModalOpen(true) : handleAletToLogin()}>修改密碼</Button>
-                        <Button variant="danger" onClick={() => isLoggedIn ? setIsDeleteModalOpen(true) : handleAletToLogin()}>刪除帳號</Button>
+                        <Button variant="secondary" onClick={() => isLoggedIn ? setIsPasswordModalOpen(true) : handleAletToLogin()}>
+                            修改密碼
+                        </Button>
+                        <Button variant="danger" onClick={() => isLoggedIn ? setIsDeleteModalOpen(true) : handleAletToLogin()}>
+                            刪除帳號
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -217,61 +242,12 @@ const ProfilePage: React.FC = () => {
                 <div className="modal">
                     <div className="modal-content">
                         <h3>修改密碼</h3>
-                        <form onSubmit={handlePasswordSubmit}>
-                            <div className="modal-input-group">
-                                <label>舊密碼</label>
-                                <input
-                                    type="password"
-                                    value={passwordInput.oldPassword}
-                                    onChange={(e) => setPasswordInput({ ...passwordInput, oldPassword: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="modal-input-group">
-                                <label>新密碼</label>
-                                <input
-                                    type="password"
-                                    value={passwordInput.newPassword}
-                                    onChange={(e) => setPasswordInput({ ...passwordInput, newPassword: e.target.value })}
-                                    required
-                                    minLength={6}
-                                    maxLength={12}
-                                />
-                            </div>
-                            <div className="modal-input-group">
-                                <label>確認密碼</label>
-                                <input
-                                    type="password"
-                                    value={passwordInput.confirmPassword}
-                                    onChange={(e) => setPasswordInput({ ...passwordInput, confirmPassword: e.target.value })}
-                                    required
-                                    minLength={6}
-                                    maxLength={12}
-                                />
-                            </div>
-                            <div className="modal-actions">
-                                <Button 
-                                    type="submit" 
-                                    variant="secondary"
-                                >
-                                    確定
-                                </Button>
-                                <Button 
-                                    type="button"
-                                    variant="danger"
-                                    onClick={() => {
-                                        setIsPasswordModalOpen(false);
-                                        setPasswordInput({
-                                            oldPassword: '',
-                                            newPassword: '',
-                                            confirmPassword: ''
-                                        });
-                                    }}
-                                >
-                                    取消
-                                </Button>
-                            </div>
-                        </form>
+                        <PasswordForm
+                            passwordInput={passwordInput}
+                            onSubmit={handlePasswordSubmit}
+                            onChange={handlePasswordChange}
+                            onCancel={handlePasswordCancel}
+                        />
                     </div>
                 </div>
             )}
@@ -281,20 +257,24 @@ const ProfilePage: React.FC = () => {
                 <div className="modal">
                     <div className="modal-content">
                         <h3>確認刪除帳號</h3>
-                        <p>您確定要刪除帳號嗎？此操作無法恢復。</p>
-                        <div className="modal-input-group">
-                            <label>請輸入密碼以確認</label>
-                            <input
-                                type="password"
-                                value={passwordInput.oldPassword}
-                                onChange={(e) => setPasswordInput({ ...passwordInput, oldPassword: e.target.value })}
-                                placeholder="請輸入密碼"
-                            />
-                        </div>
-                        <div className="modal-actions">
-                            <Button variant="secondary" onClick={handleDeleteAccount}>刪除</Button>
-                            <Button variant="danger" onClick={() => [setIsDeleteModalOpen(false), setPasswordInput({ ...passwordInput, oldPassword: "" })]}>取消</Button>
-                        </div>
+                        <DeleteAccountForm
+                            password={passwordInput.oldPassword}
+                            onChange={(e) => setPasswordInput({
+                                ...passwordInput,
+                                oldPassword: e.target.value
+                            })}
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleDeleteAccount();
+                            }}
+                            onCancel={() => {
+                                setIsDeleteModalOpen(false);
+                                setPasswordInput({
+                                    ...passwordInput,
+                                    oldPassword: ''
+                                });
+                            }}
+                        />
                     </div>
                 </div>
             )}
