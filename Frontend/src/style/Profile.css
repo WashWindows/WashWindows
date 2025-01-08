@@ -70,43 +70,23 @@
 }
 
 .profile-container .edit-icon:hover {
-  color: #74b9ff; /* 淡藍色點擊效果 */
+  color: #74b9ff;
 }
 
 .profile-container .stats {
   margin-top: 10px;
-  font-size: 16px;
+  font-size: 18px;
   color: #555;
-}
-
-.profile-container .action-buttons {
-  margin-top: 30px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px; /* 按鈕之間的間距 */
-}
-
-.profile-container .button {
-  background-color: #0984e3;
-  color: #fff;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 30px; /* 圓形按鈕 */
-  font-size: 16px;
-  font-weight: bold;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
 }
 
 .profile-container .button:hover {
-  background-color: #74b9ff; /* 淡藍色 */
-  transform: translateY(-2px); /* 輕微提升效果 */
+  background-color: #74b9ff;
+  transform: translateY(-2px);
 }
 
 .profile-container .button:active {
-  transform: translateY(2px); /* 點擊時稍微下壓 */
+  transform: translateY(2px);
 }
 
 .profile-container input{

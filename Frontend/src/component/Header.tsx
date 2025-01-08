@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User } from '../interface/User';
 import '../style/Header.css';
+import { Button } from './Button';
 
 interface HeaderProps {
   isLoggedIn: boolean;
@@ -35,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, user, onLogout }) => {
                   <a href="#/Manager">管理員選項</a>
                 </>
               )}
-              <button onClick={onLogout}>登出</button>
+              <Button variant='danger' onClick={onLogout}>登出</Button>
             </div>
           </div>
         )}

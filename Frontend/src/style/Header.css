@@ -105,16 +105,4 @@
   width: 100%;
   padding: 0.8rem;
   margin-top: 0.5rem;
-  border: none;
-  font-size: 1rem;
-  background-color: #e74c3c;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.Header .dropdown button:hover {
-  background-color: #c0392b;
-  transform: translateY(-2px);
 }

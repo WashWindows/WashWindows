@@ -1,0 +1,63 @@
+.custom-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    margin: 5px;
+    min-width: 100px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 基本陰影 */
+}
+
+.custom-button.primary {
+    background-color: #333333;
+    color: white;
+    width: calc(100% - 2rem);
+    padding: 0.8rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* 較深的陰影 */
+}
+
+.custom-button.primary:hover {
+    background-color: #666666;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 懸停時加深陰影 */
+}
+
+.custom-button.secondary {
+    background-color: #007bff;
+    color: white;
+}
+
+.custom-button.secondary:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3); /* 帶有品牌色的陰影 */
+}
+
+.custom-button.danger {
+    background-color: rgba(255, 24, 24, 0.712);
+    color: white;
+}
+
+.custom-button.danger:hover {
+    background-color: rgb(255, 4, 4);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3); /* 帶有紅色的陰影 */
+}
+
+.custom-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none; /* 禁用狀態移除陰影 */
+}
+
+.custom-button:focus {
+    outline: none;
+    box-shadow: 0 0 3px #007bff, 0 2px 4px rgba(0, 0, 0, 0.1); /* 保持基本陰影並添加焦點效果 */
+}
+
+.modal-actions .custom-button {
+    flex: 1;
+}
