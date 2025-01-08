@@ -6,6 +6,7 @@ import { asyncPost } from '../utils/fetch';
 import Header from '../component/Header';
 import { handleLogout } from '../utils/logoutHandler';
 import { LoginForm } from '../component/Form';
+import PageContainer from '../component/pageContainer';
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -55,12 +56,8 @@ const Login: React.FC = () => {
 
   return (
     <>
-      <Header 
-        isLoggedIn={isLoggedIn} 
-        user={user} 
-        onLogout={() => handleLogout(onLogout)} 
-      />
-      <div className="login-container">
+      <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
+      <PageContainer variant='auth'>
         <div className="form-container">
           <h2 className="title">登入</h2>
           <LoginForm
@@ -71,7 +68,7 @@ const Login: React.FC = () => {
             onChange={handleChange}
           />
         </div>
-      </div>
+      </PageContainer>
     </>
   );
 };

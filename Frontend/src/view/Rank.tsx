@@ -6,6 +6,7 @@ import { asyncGet } from '../utils/fetch';
 import { user_api } from '../enum/api';
 import { RankItem } from '../interface/RankItem';
 import { handleLogout } from '../utils/logoutHandler';
+import PageContainer from '../component/pageContainer';
 
 export const Rank: React.FC = () => {
     const [rank, setRank] = useState<RankItem[]>([]);
@@ -75,7 +76,7 @@ export const Rank: React.FC = () => {
     return (
         <>
             <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
-            <div className="rank-page">
+            <PageContainer variant="dashboard">
                 <h1>排行榜</h1>
                 <button className="toggle-sort-btn" onClick={toggleSort}>
                     排序依據：{sortBy === 'points' ? '分數' : '名稱'}
@@ -105,7 +106,7 @@ export const Rank: React.FC = () => {
                         </>
                     )}
                 </div>
-            </div>
+            </PageContainer>
         </>
     );
 };

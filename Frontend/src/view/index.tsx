@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Window from "../assets/window.png";
-import Rag from "../assets/rag.png";
-import Dirty from "../assets/dirty.png";
 import { User } from '../interface/User';
 import '../style/index.css';
 import { asyncPut } from '../utils/fetch';
@@ -10,256 +7,123 @@ import Header from '../component/Header';
 import { handleLogout } from '../utils/logoutHandler';
 import RankList from '../component/RankList';
 import Scoreboard from '../component/Scoreboard';
-import wipeAudio from '../assets/wipe.mp3';
-import wrongAudio from '../assets/wrong.mp3';
+import GameArea from '../component/GameArea';
 
 export const WashWindowsGame: React.FC = () => {
-  const [points, setPoints] = useState<number>(0);
-  const [pointsBuffer, setPointsBuffer] = useState<number>(0);
-  const [clicked, setClicked] = useState<number>(0);
-  const [clickedBuffer, setClickedBuffer] = useState<number>(0);
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [updateStatus, setUpdateStatus] = useState<string>("");
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [currentKey, setCurrentKey] = useState<string | null>(null);
-  const [wrongAttempt, setWrongAttempt] = useState(false);
-  const [position, setPosition] = useState({ top: 60, left: 50 });
-  const [dirtyPosition, setDirtyPosition] = useState({ top: 50, left: 50 });
-  const [dirtyVisible, setDirtyVisible] = useState<boolean>(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isExiting, setIsExiting] = useState<boolean>(false);
-  const token = localStorage.getItem('token');
-  const savedUser = localStorage.getItem('user');
+    const [points, setPoints] = useState<number>(0);
+    const [pointsBuffer, setPointsBuffer] = useState<number>(0);
+    const [clicked, setClicked] = useState<number>(0);
+    const [clickedBuffer, setClickedBuffer] = useState<number>(0);
+    const [isUpdating, setIsUpdating] = useState<boolean>(false);
+    const [updateStatus, setUpdateStatus] = useState<string>("");
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
+    const [isExiting, setIsExiting] = useState<boolean>(false);
+    const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
 
-  const onLogout = () => {
-    setIsLoggedIn(false);
-    setUser(null);
-  };
-
-  useEffect(() => {
-    if (token && savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setIsLoggedIn(true);
-      setUser(parsedUser);
-      setPoints(parsedUser.points);
-      setClicked(parsedUser.clicked || 0);
-      
-      setPointsBuffer(parsedUser.points);
-      setClickedBuffer(parsedUser.clicked || 0);
-    }
-  }, []);
-  
-  const togglePanel = () => {
-    setIsPanelOpen(!isPanelOpen);
-  };
-
-  const throttledUpdatePoints = async () => {
-    if (points === pointsBuffer && clicked === clickedBuffer) {
-      return;
-    }
-    if (!user?._id || !token) {
-      setUpdateStatus("請先登入！");
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      const response = await asyncPut(user_api.updatePoints, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: {
-          _id: user?._id,
-          points: points,
-          clicked: clicked
-        }
-      });
-
-      if (response.status === 200) {
-        setPointsBuffer(points);
-        setClickedBuffer(clicked);
-        setUpdateStatus("分數已更新！");
-        const updatedUser = { ...user, points: points, clicked: clicked };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        setUser(updatedUser);
-        
-        setTimeout(() => {
-          setIsExiting(true);
-          setTimeout(() => {
-            setUpdateStatus("");
-            setIsExiting(false);
-          }, 300);
-        }, 2000);
-      }
-    } catch (error) {
-      console.error('Error updating points:', error);
-      setUpdateStatus("更新失敗，請稍後再試");
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isUpdating) {
-        throttledUpdatePoints();
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [points, clicked, isUpdating]);
-
-  const handleScoreIncrease = () => {
-    setPoints(prev => prev + 1);
-    setClicked(prev => prev + 1);
-  };
-
-  const handleWrongAttempt = () => {
-    setWrongAttempt(true);
-    setClicked(prev => prev + 1);
-  };
-
-  const generateDirtyPosition = (key: string): { top: number, left: number } => {
-    switch (key) {
-      case "ArrowUp":
-        return { top: 20, left: 48 };
-      case "ArrowDown":
-        return { top: 68, left: 48 };
-      case "ArrowLeft":
-        return { top: 42, left: 40 };
-      case "ArrowRight":
-        return { top: 42, left: 55 };
-      default:
-        return position;
-    }
-  };
-
-  const generateRandomKey = () => {
-    const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    const newPosition = generateDirtyPosition(randomKey);
-    setDirtyVisible(false);
-
-    setTimeout(() => {
-      setDirtyPosition(newPosition);
-      setDirtyVisible(true);
-    }, 100);
-
-    return randomKey;
-  };
-
-  useEffect(() => {
-    setCurrentKey(generateRandomKey());
-  }, []);
-
-  const playSound = (src: string) => {
-    const audio = new Audio(src);
-    audio.play();
-  };
-
-  const updatePosition = (key: string) => {
-    const step = 8;
-    setPosition((prevPosition) => {
-      switch (key) {
-        case "ArrowUp":
-          return { ...prevPosition, top: Math.max(0, prevPosition.top - step - 10) };
-        case "ArrowDown":
-          return { ...prevPosition, top: Math.min(95, prevPosition.top + step + 10) };
-        case "ArrowLeft":
-          return { ...prevPosition, left: Math.max(0, prevPosition.left - step) };
-        case "ArrowRight":
-          return { ...prevPosition, left: Math.min(95, prevPosition.left + step) };
-        default:
-          return prevPosition;
-      }
-    });
-
-    setTimeout(() => {
-      setPosition({ top: 60, left: 50 });
-    }, 200);
-  };
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    const key = event.key;
-    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) {
-      if (key === currentKey) {
-        handleScoreIncrease();
-        setWrongAttempt(false);
-        updatePosition(key);
-        playSound(wipeAudio);
-        setTimeout(() => {
-          setCurrentKey(generateRandomKey());
-        }, 200)
-      } else {
-        playSound(wrongAudio);
-        updatePosition(key);
-        handleWrongAttempt();
-      }
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+    const onLogout = () => {
+        setIsLoggedIn(false);
+        setUser(null);
     };
-  }, [currentKey]);
 
-  return (
-    <div className="index-container">
-      <Header 
-        isLoggedIn={isLoggedIn} 
-        user={user} 
-        onLogout={() => handleLogout(onLogout)} 
-      />
-      <RankList isOpen={isPanelOpen} togglePanel={togglePanel} />
-      <div className="game-area">
-        <img className="window" src={Window} alt="Window" />
-        <div
-          className="rag"
-          style={{
-            top: `${position.top}%`,
-            left: `${position.left}%`,
-          }}
-        >
-          <img className="rag" src={Rag} alt="rag" />
+    useEffect(() => {
+        if (token && savedUser) {
+            const parsedUser = JSON.parse(savedUser);
+            setIsLoggedIn(true);
+            setUser(parsedUser);
+            setPoints(parsedUser.points);
+            setClicked(parsedUser.clicked || 0);
+            
+            setPointsBuffer(parsedUser.points);
+            setClickedBuffer(parsedUser.clicked || 0);
+        }
+    }, []);
+    
+    const togglePanel = () => {
+        setIsPanelOpen(!isPanelOpen);
+    };
+
+    const throttledUpdatePoints = async () => {
+        if (points === pointsBuffer && clicked === clickedBuffer) {
+            return;
+        }
+        if (!user?._id || !token) {
+            setUpdateStatus("請先登入！");
+            return;
+        }
+
+        setIsUpdating(true);
+        try {
+            const response = await asyncPut(user_api.updatePoints, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: {
+                    _id: user?._id,
+                    points: points,
+                    clicked: clicked
+                }
+            });
+
+            if (response.status === 200) {
+                setPointsBuffer(points);
+                setClickedBuffer(clicked);
+                setUpdateStatus("分數已更新！");
+                const updatedUser = { ...user, points: points, clicked: clicked };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setUser(updatedUser);
+                
+                setTimeout(() => {
+                    setIsExiting(true);
+                    setTimeout(() => {
+                        setUpdateStatus("");
+                        setIsExiting(false);
+                    }, 300);
+                }, 2000);
+            }
+        } catch (error) {
+            console.error('Error updating points:', error);
+            setUpdateStatus("更新失敗，請稍後再試");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (!isUpdating) {
+                throttledUpdatePoints();
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [points, clicked, isUpdating]);
+
+    const handleScoreIncrease = () => {
+        setPoints(prev => prev + 1);
+        setClicked(prev => prev + 1);
+    };
+
+    const handleWrongAttempt = () => {
+        setClicked(prev => prev + 1);
+    };
+
+    return (
+        <div className="index-container">
+            <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
+            <RankList isOpen={isPanelOpen} togglePanel={togglePanel} />
+            <GameArea 
+                points={points}
+                clicked={clicked}
+                onScoreIncrease={handleScoreIncrease}
+                onWrongAttempt={handleWrongAttempt}
+                updateStatus={updateStatus}
+                isExiting={isExiting}
+            />
+            <Scoreboard points={points} clicked={clicked} />
         </div>
-        {dirtyVisible && (
-          <div
-            className="dirty"
-            style={{
-              top: `${dirtyPosition.top}%`,
-              left: `${dirtyPosition.left}%`,
-            }}
-          >
-            <img src={Dirty} alt="dirty" className="dirty-animation" />
-          </div>
-        )}
-        <div className="controls">
-          {["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].map((key) => (
-            <button
-              key={key}
-              className={`control-button ${key === currentKey ? 'current' : ''} ${wrongAttempt && key === currentKey ? 'wrong' : ''}`}
-            >
-              {key === "ArrowUp" && " ⭡"}
-              {key === "ArrowDown" && "⭣"}
-              {key === "ArrowLeft" && "⭠"}
-              {key === "ArrowRight" && "⭢"}
-            </button> 
-          ))}
-        </div>
-        {updateStatus && (
-          <div 
-            className={`update-status ${isExiting ? 'exit' : ''}`}  
-            style={{ 
-              backgroundColor: updateStatus === "請先登入！" ? '#ff2222' : '#3498dbe6' 
-            }}
-          >
-            {updateStatus}
-          </div>
-        )}
-      </div>
-      <Scoreboard points={points} clicked={clicked} />
-    </div>
-  );
+    );
 };
+
+export default WashWindowsGame;

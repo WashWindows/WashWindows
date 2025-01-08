@@ -5,6 +5,7 @@ import { User } from '../interface/User';
 import { asyncGet, asyncDelete, asyncPut } from '../utils/fetch';
 import { admin_api } from '../enum/api';
 import { handleLogout } from '../utils/logoutHandler';
+import PageContainer from '../component/pageContainer';
 
 const Manager: React.FC = () => {
     const [players, setPlayers] = useState<User[]>([]);
@@ -126,25 +127,27 @@ const Manager: React.FC = () => {
     return (
         <>
             <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
-            <div className="manager-page">
-                <h1>玩家管理</h1>
-                <button className="toggle-sort-btn" onClick={handleSort}>
-                    排序依據：{sortKeyLabels[sortKeys[(sortIndex) % sortKeys.length]]}
-                </button>
-                <div className="player-list">
-                    {players.map((player) => (
-                        <div key={player._id} className="player-card">
-                            <h4>{player.username}</h4>
-                            <p>ID: {player._id}</p>
-                            <p>{sortKeyLabels.points}: {player.points}</p>
-                            <p>{sortKeyLabels.clicked}: {player.clicked}</p>
-                            <p>{sortKeyLabels.accuracy}: {calculateAccuracy(player.points, player.clicked)}%</p>
-                            <button onClick={() => handleResetScore(player._id)}>重置分數</button>
-                            <button className="deleteButton" onClick={() => handleDelete(player._id)}>刪除</button>
-                        </div>
-                    ))}
+            <PageContainer variant="dashboard">
+                <div className="manager-page">
+                    <h1>玩家管理</h1>
+                    <button className="toggle-sort-btn" onClick={handleSort}>
+                        排序依據：{sortKeyLabels[sortKeys[(sortIndex) % sortKeys.length]]}
+                    </button>
+                    <div className="player-list">
+                        {players.map((player) => (
+                            <div key={player._id} className="player-card">
+                                <h4>{player.username}</h4>
+                                <p>ID: {player._id}</p>
+                                <p>{sortKeyLabels.points}: {player.points}</p>
+                                <p>{sortKeyLabels.clicked}: {player.clicked}</p>
+                                <p>{sortKeyLabels.accuracy}: {calculateAccuracy(player.points, player.clicked)}%</p>
+                                <button onClick={() => handleResetScore(player._id)}>重置分數</button>
+                                <button className="deleteButton" onClick={() => handleDelete(player._id)}>刪除</button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            </PageContainer>
         </>
     );
 };

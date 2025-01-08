@@ -6,6 +6,7 @@ import { auth_api } from '../enum/api';
 import Header from '../component/Header';
 import { handleLogout } from '../utils/logoutHandler';
 import { RegisterForm } from '../component/Form';
+import PageContainer from '../component/pageContainer';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -94,17 +95,13 @@ const Register: React.FC = () => {
 
   return (
     <>
-      <Header 
-        isLoggedIn={isLoggedIn} 
-        user={user} 
-        onLogout={() => handleLogout(onLogout)} 
-      />
-      <div className="register-container">
+      <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
+      <PageContainer variant='auth'>
         <div className="form-container">
           <h2 className="title">註冊</h2>
           <RegisterForm formData={formData} error={error} isLoading={isLoading} onSubmit={handleSubmit} onChange={handleChange}></RegisterForm>
         </div>
-      </div>
+      </PageContainer>
     </>
   );
 };

@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { handleLogout } from '../utils/logoutHandler';
 import { Button } from '../component/Button';
 import { DeleteAccountForm, PasswordForm } from '../component/Form';
+import PageContainer from '../component/pageContainer';
 
 const ProfilePage: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -183,7 +184,7 @@ const ProfilePage: React.FC = () => {
     return (
         <>
             <Header isLoggedIn={isLoggedIn} user={user} onLogout={() => handleLogout(onLogout)} />
-            <div className="profile-page">
+            <PageContainer variant="dashboard">
                 <div className="profile-container">
                     <div className="image-container">
                         <label htmlFor="image-upload" className="image-label">
@@ -235,9 +236,9 @@ const ProfilePage: React.FC = () => {
                         </Button>
                     </div>
                 </div>
-            </div>
+            </PageContainer>
 
-            {/* 修改密碼 Modal */}
+            {/* Modals 保持不變 */}
             {isPasswordModalOpen && (
                 <div className="modal">
                     <div className="modal-content">
@@ -252,7 +253,6 @@ const ProfilePage: React.FC = () => {
                 </div>
             )}
 
-            {/* 刪除帳號 Modal */}
             {isDeleteModalOpen && (
                 <div className="modal">
                     <div className="modal-content">
