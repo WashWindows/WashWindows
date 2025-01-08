@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { asyncGet } from '../utils/fetch';
-import { user_api } from '../enum/api';
-import '../style/RankList.css';
-import { RankItem } from '../interface/RankItem';
+import { asyncGet } from '../../utils/fetch';
+import { user_api } from '../../enum/api';
+import '../../style/RankList.css';
+import { RankItem } from '../../interface/RankItem';
 
 interface RankListProps {
   isOpen: boolean;
@@ -66,7 +66,7 @@ const RankList: React.FC<RankListProps> = ({ isOpen, togglePanel }) => {
           {isRefreshing ? (
             <div className="loading">刷新中...</div>
           ) : (
-            rank.slice(0, 10).map((item, index) => (
+            rank.slice(0, 9).map((item, index) => (
               <div key={index} className="rank-item">
                 <span className="rank-number">{index + 1}</span>
                 <span className="username">{item.username}</span>

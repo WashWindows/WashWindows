@@ -1,5 +1,5 @@
 import React from 'react';
-import '../style/Button.css';
+import '../../style/Button.css';
 
 type ButtonProps = {
     variant?: 'primary' | 'secondary' | 'danger';

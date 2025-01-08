@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { User } from '../interface/User';
-import '../style/Header.css';
+import { User } from '../../interface/User';
+import '../../style/Header.css';
 import { Button } from './Button';
 
 interface HeaderProps {

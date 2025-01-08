@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from './Button';
-import '../style/Form.css';
+import '../../style/Form.css';
 
 interface FormInputProps {
     type: string;

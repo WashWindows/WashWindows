@@ -1,5 +1,5 @@
 import React from 'react';
-import '../style/Scoreboard.css';
+import '../../style/Scoreboard.css';
 
 interface ScoreboardProps {
     points: number;
