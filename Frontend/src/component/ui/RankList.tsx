@@ -9,7 +9,7 @@ interface RankListProps {
   togglePanel: () => void;
 }
 
-const RankList: React.FC<RankListProps> = ({ isOpen, togglePanel }) => {
+export const RankList: React.FC<RankListProps> = ({ isOpen, togglePanel }) => {
   const [rank, setRank] = useState<RankItem[]>([]);
   const [user, setUser] = useState<RankItem | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -89,5 +89,3 @@ const RankList: React.FC<RankListProps> = ({ isOpen, togglePanel }) => {
     </div>
   );
 };
-
-export default RankList;
