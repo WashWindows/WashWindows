@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import '../style/Auth.css';
 import { auth_api } from '../enum/api';
 import { asyncPost } from '../utils/fetch';
-import Header from '../component/ui/Header';
+import { Header } from '../component/ui/Header';
 import { handleLogout } from '../utils/logoutHandler';
 import { LoginForm } from '../component/ui/Form';
-import PageContainer from '../component/ui/PageContainer';
+import { PageContainer } from '../component/ui/PageContainer';
 import { useAuth } from '../hooks/useAuth';
 
 export const Login: React.FC = () => {

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import '../style/Manager.css';
-import Header from '../component/ui/Header';
+import { Header } from '../component/ui/Header';
 import { User } from '../interface/User';
 import { asyncGet, asyncDelete, asyncPut } from '../utils/fetch';
 import { admin_api } from '../enum/api';
 import { handleLogout } from '../utils/logoutHandler';
-import PageContainer from '../component/ui/PageContainer';
+import { PageContainer } from '../component/ui/PageContainer';
 import { useAuth } from '../hooks/useAuth';
 
 export const Manager: React.FC = () => {

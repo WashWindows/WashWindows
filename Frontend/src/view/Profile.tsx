@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import userPng from "../assets/user.jpg";
 import '../style/Profile.css';
 import '../style/Form.css';
-import Header from '../component/ui/Header';
+import { Header } from '../component/ui/Header';
 import { asyncDelete, asyncPost, asyncPut } from '../utils/fetch';
 import { user_api } from '../enum/api';
 import { useNavigate } from 'react-router-dom';
 import { handleLogout } from '../utils/logoutHandler';
 import { Button } from '../component/ui/Button';
 import { DeleteAccountForm, PasswordForm } from '../component/ui/Form';
-import PageContainer from '../component/ui/PageContainer';
+import { PageContainer } from '../component/ui/PageContainer';
 import { useAuth } from '../hooks/useAuth';
 
 export const Profile: React.FC = () => {
