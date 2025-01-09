@@ -9,7 +9,7 @@ interface HeaderProps {
   onLogout: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ isLoggedIn, user, onLogout }) => {
+export const Header: React.FC<HeaderProps> = ({ isLoggedIn, user, onLogout }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const toggleDropdown = () => {
@@ -44,5 +44,3 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, user, onLogout }) => {
     </header>
   );
 };
-
-export default Header;
