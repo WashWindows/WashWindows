@@ -164,5 +164,3 @@ export const GameArea: React.FC<GameAreaProps> = ({
         </div>
     );
 };
-
-export default GameArea;
