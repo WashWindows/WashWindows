@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import '../style/index.css';
 import { asyncPut } from '../utils/fetch';
 import { user_api } from '../enum/api';
-import Header from '../component/ui/Header';
+import { Header } from '../component/ui/Header';
 import { handleLogout } from '../utils/logoutHandler';
-import RankList from '../component/ui/RankList';
-import Scoreboard from '../component/ui/Scoreboard';
-import GameArea from '../component/game/GameArea';
+import { RankList } from '../component/ui/RankList';
+import { Scoreboard } from '../component/ui/Scoreboard';
+import { GameArea }from '../component/game/GameArea';
 import { useAuth } from '../hooks/useAuth';
 
 export const Game: React.FC = () => {

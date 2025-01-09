@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import '../style/Rank.css';
-import Header from '../component/ui/Header';
+import { Header } from '../component/ui/Header';
 import { asyncGet } from '../utils/fetch';
 import { user_api } from '../enum/api';
 import { RankItem } from '../interface/RankItem';
 import { handleLogout } from '../utils/logoutHandler';
-import PageContainer from '../component/ui/PageContainer';
+import { PageContainer } from '../component/ui/PageContainer';
 import { useAuth } from '../hooks/useAuth';
 
 export const Rank: React.FC = () => {

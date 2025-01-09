@@ -20,5 +20,3 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ points, clicked }) => {
         </div>
     );
 };
-
-export default Scoreboard;
