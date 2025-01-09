@@ -134,7 +134,7 @@ export async function asyncPut(api: string, { body, headers = {} }: { body?: any
  * 
  * @example
  * // 刪除用戶帳號
- * const response = await asyncPut('https://api.example.com/users/deleteByUserId', {
+ * const response = await asyncDelete('https://api.example.com/users/deleteByUserId', {
  *   headers: {
  *     'Authorization': 'Bearer token'
  *   }
