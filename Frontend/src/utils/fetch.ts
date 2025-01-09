@@ -133,7 +133,7 @@ export async function asyncPut(api: string, { body, headers = {} }: { body?: any
  * @throws {Error} 當請求失敗時拋出錯誤
  * 
  * @example
- * // 更新用戶分數
+ * // 刪除用戶帳號
  * const response = await asyncPut('https://api.example.com/users/deleteByUserId', {
  *   headers: {
  *     'Authorization': 'Bearer token'
