@@ -309,11 +309,6 @@
         "Authorization": "Bearer {token}" 
     }
     ```
-
-    Query:
-    ```
-        _id=677e4fff6068412796e8445d
-    ```
 + ###### Response
     - 200
         ```json
